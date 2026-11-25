@@ -166,3 +166,25 @@ btnReset.addEventListener('click', () => {
 
 applyCfg();
 render();
+
+const btnCsv = document.getElementById('btn-csv');
+btnCsv.addEventListener('click', () => {
+  const rows = getData();
+  if (!rows.length) {
+    alert('Belum ada transaksi untuk di-export.');
+    return;
+  }
+  const header = ['Jam', 'Layanan', 'Keterangan', 'Modal', 'Laba', 'Total'];
+  const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const lines = [
+    header.map(esc).join(','),
+    ...rows.map((r) => [r.jam, r.jenis, r.ket, r.modal, r.laba, r.modal + r.laba].map(esc).join(','))
+  ];
+  const blob = new Blob(['\uFEFF' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `rekap-pos-agen-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
