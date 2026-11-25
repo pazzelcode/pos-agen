@@ -28,8 +28,9 @@ input:focus,select:focus{outline:none;border-color:#ffd166}
 .trx-amount .bayar{display:block;font-size:.86rem;font-weight:700;color:#fff}
 .trx-amount .untung{font-size:.75rem;color:#4ade80}
 
-/* spacing-form-v16 */
-#trx-form label{display:block;font-size:.78rem;color:#cbd5e1;margin-top:10px;margin-bottom:5px}
-#trx-form input,#trx-form select{width:100%;box-sizing:border-box;margin-bottom:6px}
+/* spacing-form-v17 */
+#trx-form label{display:block;font-size:.78rem;color:#cbd5e1;margin-top:6px;margin-bottom:3px;line-height:1.2}
+#trx-form label:first-child{margin-top:0}
+#trx-form input,#trx-form select{width:100%;box-sizing:border-box;margin-bottom:0}
 #trx-form .grid-3>div{display:flex;flex-direction:column}
-#trx-form .grid-3 label{margin-top:0;margin-bottom:6px;line-height:1.25}
+#trx-form .grid-3 label{margin-top:0;margin-bottom:3px}
