@@ -309,7 +309,7 @@ const normTrxDate = (t) => {
 };
 
 const filterAuditTrx = (dari, sampai) => {
-  return trx.filter((t) => {
+  return getData().filter((t) => {
     const d = normTrxDate(t);
     if (dari && d < dari) return false;
     if (sampai && d > sampai) return false;
