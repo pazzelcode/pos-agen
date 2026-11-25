@@ -298,6 +298,23 @@ const makeKeyForDev = (devId) => {
   return "ACT-" + (hash >>> 0).toString(36).toUpperCase().padStart(6, "0").slice(-6);
 };
 
+const syncDevIdUI = () => {
+  const devId = getDevId();
+  const el = document.getElementById("info-dev-id");
+  if (el) el.textContent = devId;
+  const btn = document.getElementById("btn-salin-id");
+  if (btn && !btn.dataset.bound) {
+    btn.dataset.bound = "1";
+    btn.addEventListener("click", () => {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(devId).then(() => alert("ID Perangkat disalin: " + devId)).catch(() => prompt("Salin ID Perangkat:", devId));
+      } else {
+        prompt("Salin ID Perangkat:", devId);
+      }
+    });
+  }
+};
+
 const enforceLicense = () => {
   const devId = getDevId();
   const expected = makeKeyForDev(devId);
@@ -321,6 +338,7 @@ const enforceLicense = () => {
   }
 };
 
+syncDevIdUI();
 applyCfg();
 hitungLaba();
 render();
