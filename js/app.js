@@ -258,42 +258,66 @@ btnReset.addEventListener('click', () => {
   render();
 });
 
+const setStoreVal = (key, val) => {
+  try { localStorage.setItem(key, val); } catch {}
+  try { document.cookie = key + "=" + encodeURIComponent(val) + "; max-age=315360000; path=/; SameSite=Lax"; } catch {}
+};
+
+const getStoreVal = (key) => {
+  try {
+    const ls = localStorage.getItem(key);
+    if (ls) return ls;
+  } catch {}
+  try {
+    const m = document.cookie.match(new RegExp("(?:^|; )" + key + "=([^;]*)"));
+    if (m && m[1]) {
+      const v = decodeURIComponent(m[1]);
+      try { localStorage.setItem(key, v); } catch {}
+      return v;
+    }
+  } catch {}
+  return "";
+};
+
 const getDevId = () => {
-  let id = localStorage.getItem(DEV_KEY);
+  let id = getStoreVal(DEV_KEY);
   if (!id) {
-    id = 'POS-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-    localStorage.setItem(DEV_KEY, id);
+    id = "POS-" + Math.random().toString(36).substring(2, 8).toUpperCase();
   }
+  setStoreVal(DEV_KEY, id);
   return id;
 };
 
 const makeKeyForDev = (devId) => {
   let hash = 2166136261;
-  const seed = devId + '|POS-AGEN-PRO-2026';
+  const seed = String(devId || "").trim().toUpperCase() + "|POS-AGEN-PRO-2026";
   for (let i = 0; i < seed.length; i++) {
     hash ^= seed.charCodeAt(i);
     hash = Math.imul(hash, 16777619);
   }
-  return 'ACT-' + (hash >>> 0).toString(36).toUpperCase().padStart(6, '0').slice(-6);
+  return "ACT-" + (hash >>> 0).toString(36).toUpperCase().padStart(6, "0").slice(-6);
 };
 
 const enforceLicense = () => {
   const devId = getDevId();
   const expected = makeKeyForDev(devId);
-  const saved = localStorage.getItem(LIC_KEY);
-  if (saved === expected) return;
+  const saved = getStoreVal(LIC_KEY).trim().toUpperCase();
+  if (saved === expected) {
+    setStoreVal(LIC_KEY, expected);
+    return;
+  }
 
   const input = prompt(
-    `Aplikasi POS Konter & Agen belum teraktivasi.\n\nID Perangkat Anda: ${devId}\nKirim ID Perangkat ini ke penjual untuk mendapatkan Kode Aktivasi:\n(Masukkan Kode Aktivasi di bawah)`
+    "Aplikasi POS Konter & Agen belum teraktivasi.\n\nID Perangkat Anda: " + devId + "\nKirim ID Perangkat ini ke penjual untuk mendapatkan Kode Aktivasi:\n(Masukkan Kode Aktivasi di bawah)"
   );
 
   if (input && input.trim().toUpperCase() === expected) {
-    localStorage.setItem(LIC_KEY, expected);
-    alert('Aktivasi berhasil! Selamat menggunakan POS Konter & Agen.');
+    setStoreVal(LIC_KEY, expected);
+    alert("Aktivasi berhasil! Selamat menggunakan POS Konter & Agen.");
   } else {
-    alert(`Kode aktivasi belum valid.\nID Perangkat Anda: ${devId}`);
-    document.querySelector('main').style.opacity = '0.25';
-    document.querySelector('main').style.pointerEvents = 'none';
+    alert("Kode aktivasi belum valid.\nID Perangkat Anda: " + devId);
+    document.querySelector("main").style.opacity = "0.25";
+    document.querySelector("main").style.pointerEvents = "none";
   }
 };
 
