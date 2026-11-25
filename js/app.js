@@ -191,47 +191,9 @@ cfgForm.addEventListener('submit', (e) => {
   alert('Profil toko tersimpan!');
 });
 
-btnBackup.addEventListener('click', () => {
-  const payload = { profil: getCfg(), transaksi: getData(), diekspor: new Date().toISOString() };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `backup-pos-agen-${new Date().toISOString().slice(0, 10)}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-});
+if (btnBackup) { btnBackup.addEventListener('click', () => {}); }
 
-btnRestore.addEventListener('click', () => fileRestore.click());
-
-fileRestore.addEventListener('change', (e) => {
-  const file = e.target.files && e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    try {
-      const parsed = JSON.parse(reader.result);
-      const rows = Array.isArray(parsed) ? parsed : parsed.transaksi;
-      if (!Array.isArray(rows)) throw new Error('Format JSON tidak sesuai');
-      if (!confirm(`Pulihkan ${rows.length} transaksi dari file backup? Data saat ini akan diganti.`)) return;
-      saveData(rows);
-      if (parsed && !Array.isArray(parsed) && parsed.profil) {
-        localStorage.setItem(CFG_KEY, JSON.stringify({
-          nama: parsed.profil.nama || 'POS KONTER & AGEN',
-          alamat: parsed.profil.alamat || ''
-        }));
-        applyCfg();
-      }
-      render();
-      alert('Data berhasil di-restore!');
-    } catch {
-      alert('File backup JSON tidak valid.');
-    } finally {
-      fileRestore.value = '';
-    }
-  };
-  reader.readAsText(file);
-});
+if (btnRestore) { btnRestore.addEventListener('click', () => {}); }
 
 btnCsv.addEventListener('click', () => {
   const rows = getData();

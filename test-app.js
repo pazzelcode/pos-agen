@@ -54,6 +54,7 @@ try {
     document: {
       cookie: "",
       getElementById: (id) => {
+        if (!html.includes(`id="${id}"`)) return null;
         if (!elements[id]) elements[id] = makeEl(id);
         return elements[id];
       },
