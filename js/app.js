@@ -1,5 +1,7 @@
 const STORAGE_KEY = 'pos_agen_trx_v1';
 const CFG_KEY = 'pos_agen_cfg_v1';
+const LIC_KEY = 'pos_agen_lic_v1';
+const DEV_KEY = 'pos_agen_dev_v1';
 
 const form = document.getElementById('trx-form');
 const listEl = document.getElementById('trx-list');
@@ -8,6 +10,11 @@ const elLaba = document.getElementById('total-laba');
 const elTrx = document.getElementById('total-trx');
 const elTgl = document.getElementById('tanggal-hari');
 const btnReset = document.getElementById('btn-reset');
+const btnCsv = document.getElementById('btn-csv');
+
+const inputJual = document.getElementById('jual');
+const inputModal = document.getElementById('modal');
+const labaPreview = document.getElementById('laba-preview');
 
 const btnToggleCfg = document.getElementById('btn-toggle-cfg');
 const cfgBox = document.getElementById('cfg-box');
@@ -23,6 +30,18 @@ const rp = (n) => 'Rp' + Number(n || 0).toLocaleString('id-ID');
 elTgl.textContent = new Date().toLocaleDateString('id-ID', {
   weekday: 'short', day: '2-digit', month: 'short', year: 'numeric'
 });
+
+const hitungLaba = () => {
+  const jual = parseInt(inputJual.value, 10) || 0;
+  const modal = parseInt(inputModal.value, 10) || 0;
+  const laba = jual - modal;
+  labaPreview.value = (laba < 0 ? '-' : '') + rp(Math.abs(laba));
+  labaPreview.style.color = laba < 0 ? '#f87171' : '#4ade80';
+  return laba;
+};
+
+inputJual.addEventListener('input', hitungLaba);
+inputModal.addEventListener('input', hitungLaba);
 
 const getCfg = () => {
   try { return JSON.parse(localStorage.getItem(CFG_KEY)) || { nama: 'POS KONTER & AGEN', alamat: '' }; }
@@ -46,7 +65,7 @@ const saveData = (rows) => localStorage.setItem(STORAGE_KEY, JSON.stringify(rows
 
 const copyStruk = (item) => {
   const c = getCfg();
-  const bayar = item.modal + item.laba;
+  const jual = Number(item.jual ?? ((Number(item.modal) || 0) + (Number(item.laba) || 0)));
   const lines = [
     `*${(c.nama || 'POS KONTER & AGEN').toUpperCase()}*`,
     ...(c.alamat ? [c.alamat] : []),
@@ -54,7 +73,7 @@ const copyStruk = (item) => {
     `Waktu  : ${item.jam}`,
     `Layanan: ${item.jenis}`,
     `Ket    : ${item.ket}`,
-    `Total  : ${rp(bayar)}`,
+    `Total  : ${rp(jual)}`,
     '------------------------------',
     'Terima kasih!'
   ];
@@ -84,9 +103,11 @@ const render = () => {
   }
 
   rows.forEach((item) => {
-    const bayar = item.modal + item.laba;
-    totalMasuk += bayar;
-    totalLaba += item.laba;
+    const modal = Number(item.modal) || 0;
+    const jual = Number(item.jual ?? (modal + (Number(item.laba) || 0)));
+    const laba = Number(item.laba ?? (jual - modal));
+    totalMasuk += jual;
+    totalLaba += laba;
 
     const li = document.createElement('li');
     li.className = 'trx-item';
@@ -96,8 +117,8 @@ const render = () => {
         <small>${item.ket} • ${item.jam}</small>
       </div>
       <div class="trx-amount">
-        <span class="bayar">${rp(bayar)}</span>
-        <span class="untung">+${rp(item.laba)}</span>
+        <span class="bayar">${rp(jual)}</span>
+        <span class="untung" style="color:${laba < 0 ? '#f87171' : '#4ade80'}">${laba < 0 ? '-' : '+'}${rp(Math.abs(laba))}</span>
         <div style="margin-top:6px;display:flex;gap:6px;justify-content:flex-end">
           <button type="button" onclick="copyStruk(${item.id})" style="background:#3a86ff;color:#fff;border:none;padding:4px 8px;border-radius:5px;font-size:.7rem;cursor:pointer">Struk</button>
           <button type="button" onclick="hapusItem(${item.id})" style="background:#ef233c;color:#fff;border:none;padding:4px 8px;border-radius:5px;font-size:.7rem;cursor:pointer">Hapus</button>
@@ -107,7 +128,7 @@ const render = () => {
   });
 
   elMasuk.textContent = rp(totalMasuk);
-  elLaba.textContent = rp(totalLaba);
+  elLaba.textContent = (totalLaba < 0 ? '-' : '') + rp(Math.abs(totalLaba));
   elTrx.textContent = rows.length;
 };
 
@@ -143,42 +164,22 @@ btnBackup.addEventListener('click', () => {
   URL.revokeObjectURL(url);
 });
 
-form.addEventListener('submit', (e) => {
-  e.preventDefault();
-  const jenis = document.getElementById('jenis').value;
-  const ket = document.getElementById('ket').value.trim();
-  const modal = parseInt(document.getElementById('modal').value, 10) || 0;
-  const laba = parseInt(document.getElementById('laba').value, 10) || 0;
-
-  const jam = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-  const rows = getData();
-  rows.unshift({ id: Date.now(), jenis, ket, modal, laba, jam });
-  saveData(rows);
-  form.reset();
-  render();
-});
-
-btnReset.addEventListener('click', () => {
-  if (!confirm('Hapus semua riwayat transaksi yang tampil?')) return;
-  saveData([]);
-  render();
-});
-
-applyCfg();
-render();
-
-const btnCsv = document.getElementById('btn-csv');
 btnCsv.addEventListener('click', () => {
   const rows = getData();
   if (!rows.length) {
     alert('Belum ada transaksi untuk di-export.');
     return;
   }
-  const header = ['Jam', 'Layanan', 'Keterangan', 'Modal', 'Laba', 'Total'];
+  const header = ['Jam', 'Layanan', 'Keterangan', 'Harga Jual', 'Modal', 'Laba'];
   const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
   const lines = [
     header.map(esc).join(','),
-    ...rows.map((r) => [r.jam, r.jenis, r.ket, r.modal, r.laba, r.modal + r.laba].map(esc).join(','))
+    ...rows.map((r) => {
+      const modal = Number(r.modal) || 0;
+      const jual = Number(r.jual ?? (modal + (Number(r.laba) || 0)));
+      const laba = Number(r.laba ?? (jual - modal));
+      return [r.jam, r.jenis, r.ket, jual, modal, laba].map(esc).join(',');
+    })
   ];
   const blob = new Blob(['\uFEFF' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
@@ -189,8 +190,28 @@ btnCsv.addEventListener('click', () => {
   URL.revokeObjectURL(url);
 });
 
-const LIC_KEY = 'pos_agen_lic_v1';
-const DEV_KEY = 'pos_agen_dev_v1';
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const jenis = document.getElementById('jenis').value;
+  const ket = document.getElementById('ket').value.trim();
+  const jual = parseInt(inputJual.value, 10) || 0;
+  const modal = parseInt(inputModal.value, 10) || 0;
+  const laba = jual - modal;
+
+  const jam = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+  const rows = getData();
+  rows.unshift({ id: Date.now(), jenis, ket, jual, modal, laba, jam });
+  saveData(rows);
+  form.reset();
+  hitungLaba();
+  render();
+});
+
+btnReset.addEventListener('click', () => {
+  if (!confirm('Hapus semua riwayat transaksi yang tampil?')) return;
+  saveData([]);
+  render();
+});
 
 const getDevId = () => {
   let id = localStorage.getItem(DEV_KEY);
@@ -231,4 +252,7 @@ const enforceLicense = () => {
   }
 };
 
+applyCfg();
+hitungLaba();
+render();
 enforceLicense();

@@ -58,14 +58,18 @@
       </select>
       <label>Keterangan / Tujuan</label>
       <input type="text" id="ket" placeholder="Cth: nama/ barang/ 0812xxx/ Bri a.n budi" required>
-      <div class="row">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
         <div>
-          <label>Modal / Nominal (Rp)</label>
+          <label>Harga Jual (Rp)</label>
+          <input type="number" id="jual" min="0" placeholder="105000" required>
+        </div>
+        <div>
+          <label>Modal (Rp)</label>
           <input type="number" id="modal" min="0" placeholder="100000" required>
         </div>
         <div>
-          <label>Admin / Laba (Rp)</label>
-          <input type="number" id="laba" min="0" placeholder="5000" required>
+          <label>Laba (Rp)</label>
+          <input type="text" id="laba-preview" value="Rp0" readonly style="background:#1e293b;color:#4ade80;font-weight:700">
         </div>
       </div>
       <button type="submit" class="btn-primary">Simpan Transaksi</button>
