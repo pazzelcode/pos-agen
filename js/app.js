@@ -60,11 +60,35 @@ const applyCfg = () => {
 };
 
 const getData = () => {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
-  catch { return []; }
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch {}
+  try {
+    const m = document.cookie.match(new RegExp("(?:^|; )" + STORAGE_KEY + "=([^;]*)"));
+    if (m && m[1]) {
+      const parsed = JSON.parse(decodeURIComponent(m[1]));
+      if (Array.isArray(parsed)) {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed)); } catch {}
+        return parsed;
+      }
+    }
+  } catch {}
+  return [];
 };
 
-const saveData = (rows) => localStorage.setItem(STORAGE_KEY, JSON.stringify(rows));
+const saveData = (rows) => {
+  const json = JSON.stringify(rows || []);
+  try { localStorage.setItem(STORAGE_KEY, json); } catch {}
+  try {
+    if (json.length < 3800) {
+      document.cookie = STORAGE_KEY + "=" + encodeURIComponent(json) + "; max-age=315360000; path=/; SameSite=Lax";
+    }
+  } catch {}
+};
 
 const copyStruk = (item) => {
   const c = getCfg();
@@ -245,7 +269,7 @@ form.addEventListener('submit', (e) => {
 
   const jam = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
   const rows = getData();
-  rows.unshift({ id: Date.now(), jenis, ket, jual, modal, laba, jam });
+  rows.unshift({ id: Date.now(), jenis, ket, jual, modal, laba, jam, tglISO: getTodayISO() });
   saveData(rows);
   form.reset();
   hitungLaba();
@@ -341,7 +365,7 @@ const initAuditUI = () => {
     const omzet = list.reduce((a, b) => a + Number(b.jual || 0), 0);
     const modal = list.reduce((a, b) => a + Number(b.modal || 0), 0);
     const laba = list.reduce((a, b) => a + Number(b.laba || 0), 0);
-    ringkasEl.textContent = list.length + " trx | Modal Rp" + fmt(modal) + " | Omzet Rp" + fmt(omzet) + " | Laba Rp" + fmt(laba);
+    ringkasEl.textContent = list.length + " trx | Modal Rp" + rp(modal) + " | Omzet Rp" + rp(omzet) + " | Laba Rp" + rp(laba);
   };
 
   if (bulanEl && !bulanEl.dataset.bound) {
