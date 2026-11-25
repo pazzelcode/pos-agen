@@ -137,7 +137,8 @@ const copyStruk = (item) => {
     '------------------------------',
     `Waktu  : ${item.jam}`,
     `Layanan: ${item.jenis}`,
-    `Ket    : ${item.ket}`,
+    `Tujuan : ${item.tujuan || "-"}`,
+    `Ket    : ${item.ket || "-"}`,
     `Total  : ${rp(jual)}`,
     '------------------------------',
     'Terima kasih!'
@@ -163,6 +164,7 @@ const render = () => {
   const rows = q
     ? allRows.filter((item) =>
         String(item.jenis || '').toLowerCase().includes(q) ||
+        String(item.tujuan || '').toLowerCase().includes(q) ||
         String(item.ket || '').toLowerCase().includes(q) ||
         String(item.jam || '').toLowerCase().includes(q)
       )
@@ -188,7 +190,7 @@ const render = () => {
     li.innerHTML = `
       <div class="trx-meta">
         <strong>${item.jenis}</strong>
-        <small>${item.ket} • ${item.jam}</small>
+        <small>${[item.tujuan, item.ket].filter(Boolean).join(" • ")} • ${item.jam}</small>
       </div>
       <div class="trx-amount">
         <span class="bayar">${rp(jual)}</span>
@@ -248,7 +250,7 @@ btnCsv.addEventListener('click', () => {
       const modal = Number(r.modal) || 0;
       const jual = Number(r.jual ?? (modal + (Number(r.laba) || 0)));
       const laba = Number(r.laba ?? (jual - modal));
-      return [normTrxDate(r), r.jam || '', r.jenis || '', r.ket || '', jual, modal, laba].map(esc).join(';');
+      return [normTrxDate(r), r.jam || '', r.jenis || '', r.tujuan || '', r.ket || '', jual, modal, laba].map(esc).join(';');
     })
   ];
   const blob = new Blob(['\uFEFF' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
@@ -263,6 +265,8 @@ btnCsv.addEventListener('click', () => {
 form.addEventListener('submit', (e) => {
   e.preventDefault();
   const jenis = document.getElementById('jenis').value;
+  const tujuanEl = document.getElementById('tujuan');
+  const tujuan = tujuanEl ? tujuanEl.value.trim() : '';
   const ket = document.getElementById('ket').value.trim();
   const jual = parseInt(inputJual.value, 10) || 0;
   const modal = parseInt(inputModal.value, 10) || 0;
@@ -270,7 +274,7 @@ form.addEventListener('submit', (e) => {
 
   const jam = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
   const rows = getData();
-  rows.unshift({ id: Date.now(), jenis, ket, jual, modal, laba, jam, tglISO: getTodayISO() });
+  rows.unshift({ id: Date.now(), jenis, tujuan, ket, jual, modal, laba, jam, tglISO: getTodayISO() });
   saveData(rows);
   form.reset();
   hitungLaba();
@@ -402,7 +406,7 @@ const initAuditUI = () => {
           const m = Number(t.modal) || 0;
           const j = Number(t.jual ?? (m + (Number(t.laba) || 0)));
           const l = Number(t.laba ?? (j - m));
-          return [normTrxDate(t), t.jam || "", t.jenis || t.kat || "", t.ket || t.tujuan || "", m, j, l];
+          return [normTrxDate(t), t.jam || "", t.jenis || t.kat || "", t.tujuan || "", t.ket || "", m, j, l];
         }),
         [],
         ["REKAP AUDIT", dariEl.value || "AWAL", "s/d", sampaiEl.value || "AKHIR", modal, omzet, laba]
