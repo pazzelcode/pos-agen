@@ -1,0 +1,8 @@
+{
+  "name": "POS Konter & Agen",
+  "short_name": "POS Agen",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0b132b",
+  "theme_color": "#1c2541"
+}

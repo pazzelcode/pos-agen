@@ -1,0 +1,29 @@
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,sans-serif}
+body{background:#0b132b;color:#f8fafc;padding-bottom:32px}
+.topbar{background:#1c2541;border-bottom:3px solid #ffd166;padding:14px 16px;display:flex;justify-content:space-between;align-items:center}
+.topbar h1{font-size:1rem;letter-spacing:.5px;color:#ffd166}
+.topbar span{font-size:.8rem;color:#cbd5e1}
+.container{max-width:640px;margin:0 auto;padding:14px;display:flex;flex-direction:column;gap:14px}
+.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.card{background:#1c2541;border:1px solid #3a506b;border-radius:10px;padding:12px}
+.card small{display:block;font-size:.72rem;color:#94a3b8;margin-bottom:4px}
+.card strong{font-size:.95rem;color:#fff}
+.card.accent{background:#1d3557;border-color:#ff006e}
+.card.accent strong{color:#ffd166}
+.form-box h2,.list-box h2{font-size:.95rem;margin-bottom:10px;color:#ffd166}
+form{display:flex;flex-direction:column;gap:10px}
+label{font-size:.78rem;color:#cbd5e1}
+input,select{width:100%;padding:10px;border-radius:8px;border:1px solid #475569;background:#0b132b;color:#fff;font-size:.9rem}
+input:focus,select:focus{outline:none;border-color:#ffd166}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn-primary{background:#3a86ff;color:#fff;border:none;padding:11px;border-radius:8px;font-weight:700;font-size:.9rem;cursor:pointer}
+.btn-primary:active{transform:scale(.99)}
+.list-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.btn-danger{background:#ef233c;color:#fff;border:none;padding:6px 10px;border-radius:6px;font-size:.75rem;font-weight:600;cursor:pointer}
+.trx-list{list-style:none;display:flex;flex-direction:column;gap:8px}
+.trx-item{background:#0b132b;border:1px solid #2b3a55;border-radius:8px;padding:10px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.trx-meta strong{display:block;font-size:.86rem}
+.trx-meta small{font-size:.74rem;color:#94a3b8}
+.trx-amount{text-align:right}
+.trx-amount .bayar{display:block;font-size:.86rem;font-weight:700;color:#fff}
+.trx-amount .untung{font-size:.75rem;color:#4ade80}

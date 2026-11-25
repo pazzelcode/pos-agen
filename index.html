@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POS Konter & Agen</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+</head>
+<body>
+<header class="topbar">
+  <h1>POS KONTER & AGEN</h1>
+  <span id="tanggal-hari"></span>
+</header>
+<main class="container">
+  <section class="summary-grid">
+    <div class="card">
+      <small>Omzet / Masuk</small>
+      <strong id="total-masuk">Rp0</strong>
+    </div>
+    <div class="card accent">
+      <small>Laba / Fee Bersih</small>
+      <strong id="total-laba">Rp0</strong>
+    </div>
+    <div class="card">
+      <small>Jumlah Trx</small>
+      <strong id="total-trx">0</strong>
+    </div>
+  </section>
+  <section class="card form-box">
+    <h2>Input Transaksi</h2>
+    <form id="trx-form">
+      <label>Jenis Layanan</label>
+      <select id="jenis" required>
+        <option value="Pulsa & Data">Pulsa & Paket Data</option>
+        <option value="Transfer / Tarik Tunai">Transfer / Tarik Tunai</option>
+        <option value="E-Wallet & Token">E-Wallet & Token PLN</option>
+        <option value="Produk Fisik">Produk Fisik / Aksesoris</option>
+      </select>
+      <label>Keterangan / Tujuan</label>
+      <input type="text" id="ket" placeholder="Cth: 0812xxxx / BRI a.n Budi" required>
+      <div class="row">
+        <div>
+          <label>Modal / Nominal (Rp)</label>
+          <input type="number" id="modal" min="0" placeholder="100000" required>
+        </div>
+        <div>
+          <label>Admin / Laba (Rp)</label>
+          <input type="number" id="laba" min="0" placeholder="5000" required>
+        </div>
+      </div>
+      <button type="submit" class="btn-primary">Simpan Transaksi</button>
+    </form>
+  </section>
+  <section class="card list-box">
+    <div class="list-head">
+      <h2>Riwayat Transaksi</h2>
+      <button type="button" id="btn-reset" class="btn-danger">Reset Hari Ini</button>
+    </div>
+    <ul id="trx-list" class="trx-list"></ul>
+  </section>
+</main>
+<script src="js/app.js"></script>
+<script>if("serviceWorker"in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));}</script>
+</body>
+</html>
