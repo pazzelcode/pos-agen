@@ -298,6 +298,106 @@ const makeKeyForDev = (devId) => {
   return "ACT-" + (hash >>> 0).toString(36).toUpperCase().padStart(6, "0").slice(-6);
 };
 
+const getTodayISO = () => {
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+};
+
+const normTrxDate = (t) => {
+  if (t && /^\d{4}-\d{2}-\d{2}$/.test(t.tglISO || "")) return t.tglISO;
+  return getTodayISO();
+};
+
+const filterAuditTrx = (dari, sampai) => {
+  return trx.filter((t) => {
+    const d = normTrxDate(t);
+    if (dari && d < dari) return false;
+    if (sampai && d > sampai) return false;
+    return true;
+  });
+};
+
+const downloadFile = (content, filename, mime) => {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+};
+
+const initAuditUI = () => {
+  const bulanEl = document.getElementById("audit-bulan");
+  const dariEl = document.getElementById("audit-dari");
+  const sampaiEl = document.getElementById("audit-sampai");
+  const ringkasEl = document.getElementById("audit-ringkasan");
+  const btnCsv = document.getElementById("btn-audit-csv");
+  const btnJson = document.getElementById("btn-audit-json");
+  if (!dariEl || !sampaiEl || !ringkasEl) return;
+
+  const updateSummary = () => {
+    const list = filterAuditTrx(dariEl.value, sampaiEl.value);
+    const omzet = list.reduce((a, b) => a + Number(b.jual || 0), 0);
+    const modal = list.reduce((a, b) => a + Number(b.modal || 0), 0);
+    const laba = list.reduce((a, b) => a + Number(b.laba || 0), 0);
+    ringkasEl.textContent = list.length + " trx | Modal Rp" + fmt(modal) + " | Omzet Rp" + fmt(omzet) + " | Laba Rp" + fmt(laba);
+  };
+
+  if (bulanEl && !bulanEl.dataset.bound) {
+    bulanEl.dataset.bound = "1";
+    bulanEl.addEventListener("change", () => {
+      if (!bulanEl.value) return;
+      const [y, m] = bulanEl.value.split("-").map(Number);
+      const lastDay = new Date(y, m, 0).getDate();
+      dariEl.value = bulanEl.value + "-01";
+      sampaiEl.value = bulanEl.value + "-" + String(lastDay).padStart(2, "0");
+      updateSummary();
+    });
+  }
+
+  [dariEl, sampaiEl].forEach((el) => {
+    if (el && !el.dataset.bound) {
+      el.dataset.bound = "1";
+      el.addEventListener("change", updateSummary);
+    }
+  });
+
+  if (btnCsv && !btnCsv.dataset.bound) {
+    btnCsv.dataset.bound = "1";
+    btnCsv.addEventListener("click", () => {
+      const list = filterAuditTrx(dariEl.value, sampaiEl.value);
+      const omzet = list.reduce((a, b) => a + Number(b.jual || 0), 0);
+      const modal = list.reduce((a, b) => a + Number(b.modal || 0), 0);
+      const laba = list.reduce((a, b) => a + Number(b.laba || 0), 0);
+      const rows = [
+        ["Tanggal", "Jam", "Layanan", "Tujuan/Keterangan", "Modal", "Harga Jual", "Laba"],
+        ...list.map((t) => [normTrxDate(t), t.jam || "", t.kat || "", (t.tujuan || "").replaceAll(",", " "), t.modal || 0, t.jual || 0, t.laba || 0]),
+        [],
+        ["REKAP AUDIT", dariEl.value || "AWAL", "s/d", sampaiEl.value || "AKHIR", modal, omzet, laba]
+      ];
+      const csv = rows.map((r) => r.join(",")).join("\n");
+      downloadFile(csv, "audit-pos-" + (dariEl.value || "all") + "-to-" + (sampaiEl.value || "all") + ".csv", "text/csv;charset=utf-8;");
+    });
+  }
+
+  if (btnJson && !btnJson.dataset.bound) {
+    btnJson.dataset.bound = "1";
+    btnJson.addEventListener("click", () => {
+      const list = filterAuditTrx(dariEl.value, sampaiEl.value);
+      const payload = {
+        toko: cfg,
+        periode: { dari: dariEl.value || null, sampai: sampaiEl.value || null },
+        jumlahTransaksi: list.length,
+        transaksi: list
+      };
+      downloadFile(JSON.stringify(payload, null, 2), "audit-pos-" + (dariEl.value || "all") + "-to-" + (sampaiEl.value || "all") + ".json", "application/json");
+    });
+  }
+
+  updateSummary();
+};
+
 const syncDevIdUI = () => {
   const devId = getDevId();
   const el = document.getElementById("info-dev-id");
@@ -339,6 +439,7 @@ const enforceLicense = () => {
 };
 
 syncDevIdUI();
+initAuditUI();
 applyCfg();
 hitungLaba();
 render();

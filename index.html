@@ -36,6 +36,25 @@
         <span>ID Perangkat: <strong id="info-dev-id" style="color:#ffd166">-</strong></span>
         <button type="button" id="btn-salin-id" style="background:#475569;color:#fff;border:none;padding:4px 9px;border-radius:6px;font-size:.72rem;font-weight:700;cursor:pointer">Salin ID</button>
       </div>
+      <div id="audit-box" style="margin-top:6px;padding:10px;background:#091024;border:1px solid #1e293b;border-radius:8px;display:grid;gap:6px">
+        <div style="font-size:.78rem;font-weight:700;color:#ffd166">Audit &amp; Tarik Data Periode</div>
+        <label style="font-size:.74rem;color:#cbd5e1">Pilih Bulan (Otomatis isi awal-akhir bulan)
+          <input type="month" id="audit-bulan" style="width:100%;margin-top:3px;padding:6px;border-radius:6px;border:1px solid #334155;background:#0f172a;color:#fff">
+        </label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <label style="font-size:.74rem;color:#cbd5e1">Dari Tanggal
+            <input type="date" id="audit-dari" style="width:100%;margin-top:3px;padding:6px;border-radius:6px;border:1px solid #334155;background:#0f172a;color:#fff">
+          </label>
+          <label style="font-size:.74rem;color:#cbd5e1">Sampai Tanggal
+            <input type="date" id="audit-sampai" style="width:100%;margin-top:3px;padding:6px;border-radius:6px;border:1px solid #334155;background:#0f172a;color:#fff">
+          </label>
+        </div>
+        <div id="audit-ringkasan" style="font-size:.74rem;color:#94a3b8">Periode: belum dipilih</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <button type="button" id="btn-audit-csv" style="background:#0284c7;color:#fff;border:none;padding:7px;border-radius:6px;font-size:.75rem;font-weight:700;cursor:pointer">Tarik CSV Audit</button>
+          <button type="button" id="btn-audit-json" style="background:#7c3aed;color:#fff;border:none;padding:7px;border-radius:6px;font-size:.75rem;font-weight:700;cursor:pointer">Tarik JSON Audit</button>
+        </div>
+      </div>
     </form>
   </section>
   <section class="summary-grid">
