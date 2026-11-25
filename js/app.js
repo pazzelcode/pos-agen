@@ -239,22 +239,23 @@ btnCsv.addEventListener('click', () => {
     alert('Belum ada transaksi untuk di-export.');
     return;
   }
-  const header = ['Jam', 'Layanan', 'Keterangan', 'Harga Jual', 'Modal', 'Laba'];
+  const header = ['Tanggal', 'Jam', 'Layanan', 'Keterangan', 'Harga Jual', 'Modal', 'Laba'];
   const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
   const lines = [
-    header.map(esc).join(','),
+    'sep=;',
+    header.map(esc).join(';'),
     ...rows.map((r) => {
       const modal = Number(r.modal) || 0;
       const jual = Number(r.jual ?? (modal + (Number(r.laba) || 0)));
       const laba = Number(r.laba ?? (jual - modal));
-      return [r.jam, r.jenis, r.ket, jual, modal, laba].map(esc).join(',');
+      return [normTrxDate(r), r.jam || '', r.jenis || '', r.ket || '', jual, modal, laba].map(esc).join(';');
     })
   ];
-  const blob = new Blob(['\uFEFF' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const blob = new Blob(['\uFEFF' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `rekap-pos-agen-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.download = `rekap-pos-agen-${getTodayISO()}.csv`;
   a.click();
   URL.revokeObjectURL(url);
 });
@@ -394,28 +395,20 @@ const initAuditUI = () => {
       const omzet = list.reduce((a, b) => a + Number(b.jual || 0), 0);
       const modal = list.reduce((a, b) => a + Number(b.modal || 0), 0);
       const laba = list.reduce((a, b) => a + Number(b.laba || 0), 0);
+      const escCell = (v) => '"' + String(v ?? '').replace(/"/g, '""') + '"';
       const rows = [
-        ["Tanggal", "Jam", "Layanan", "Tujuan/Keterangan", "Modal", "Harga Jual", "Laba"],
-        ...list.map((t) => [normTrxDate(t), t.jam || "", t.kat || "", (t.tujuan || "").replaceAll(",", " "), t.modal || 0, t.jual || 0, t.laba || 0]),
+        ["Tanggal", "Jam", "Layanan", "Keterangan", "Modal", "Harga Jual", "Laba"],
+        ...list.map((t) => {
+          const m = Number(t.modal) || 0;
+          const j = Number(t.jual ?? (m + (Number(t.laba) || 0)));
+          const l = Number(t.laba ?? (j - m));
+          return [normTrxDate(t), t.jam || "", t.jenis || t.kat || "", t.ket || t.tujuan || "", m, j, l];
+        }),
         [],
         ["REKAP AUDIT", dariEl.value || "AWAL", "s/d", sampaiEl.value || "AKHIR", modal, omzet, laba]
       ];
-      const csv = rows.map((r) => r.join(",")).join("\n");
-      downloadFile(csv, "audit-pos-" + (dariEl.value || "all") + "-to-" + (sampaiEl.value || "all") + ".csv", "text/csv;charset=utf-8;");
-    });
-  }
-
-  if (btnJson && !btnJson.dataset.bound) {
-    btnJson.dataset.bound = "1";
-    btnJson.addEventListener("click", () => {
-      const list = filterAuditTrx(dariEl.value, sampaiEl.value);
-      const payload = {
-        toko: cfg,
-        periode: { dari: dariEl.value || null, sampai: sampaiEl.value || null },
-        jumlahTransaksi: list.length,
-        transaksi: list
-      };
-      downloadFile(JSON.stringify(payload, null, 2), "audit-pos-" + (dariEl.value || "all") + "-to-" + (sampaiEl.value || "all") + ".json", "application/json");
+      const csvBody = ["sep=;", ...rows.map((r) => r.map(escCell).join(";"))].join("\r\n");
+      downloadFile("\uFEFF" + csvBody, "audit-pos-" + (dariEl.value || "all") + "-to-" + (sampaiEl.value || "all") + ".csv", "text/csv;charset=utf-8;");
     });
   }
 
