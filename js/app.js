@@ -1,4 +1,6 @@
 const STORAGE_KEY = 'pos_agen_trx_v1';
+const CFG_KEY = 'pos_agen_cfg_v1';
+
 const form = document.getElementById('trx-form');
 const listEl = document.getElementById('trx-list');
 const elMasuk = document.getElementById('total-masuk');
@@ -7,11 +9,33 @@ const elTrx = document.getElementById('total-trx');
 const elTgl = document.getElementById('tanggal-hari');
 const btnReset = document.getElementById('btn-reset');
 
+const btnToggleCfg = document.getElementById('btn-toggle-cfg');
+const cfgBox = document.getElementById('cfg-box');
+const cfgForm = document.getElementById('cfg-form');
+const cfgNama = document.getElementById('cfg-nama');
+const cfgAlamat = document.getElementById('cfg-alamat');
+const judulToko = document.getElementById('nama-toko-judul');
+const subToko = document.getElementById('sub-toko');
+const btnBackup = document.getElementById('btn-backup');
+
 const rp = (n) => 'Rp' + Number(n || 0).toLocaleString('id-ID');
 
 elTgl.textContent = new Date().toLocaleDateString('id-ID', {
   weekday: 'short', day: '2-digit', month: 'short', year: 'numeric'
 });
+
+const getCfg = () => {
+  try { return JSON.parse(localStorage.getItem(CFG_KEY)) || { nama: 'POS KONTER & AGEN', alamat: '' }; }
+  catch { return { nama: 'POS KONTER & AGEN', alamat: '' }; }
+};
+
+const applyCfg = () => {
+  const c = getCfg();
+  judulToko.textContent = c.nama || 'POS KONTER & AGEN';
+  subToko.textContent = c.alamat || '';
+  cfgNama.value = c.nama || '';
+  cfgAlamat.value = c.alamat || '';
+};
 
 const getData = () => {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
@@ -21,15 +45,20 @@ const getData = () => {
 const saveData = (rows) => localStorage.setItem(STORAGE_KEY, JSON.stringify(rows));
 
 const copyStruk = (item) => {
+  const c = getCfg();
   const bayar = item.modal + item.laba;
-  const teks = [
-    '*STRUK TRANSAKSI*',
-    `Waktu : ${item.jam}`,
+  const lines = [
+    `*${(c.nama || 'POS KONTER & AGEN').toUpperCase()}*`,
+    ...(c.alamat ? [c.alamat] : []),
+    '------------------------------',
+    `Waktu  : ${item.jam}`,
     `Layanan: ${item.jenis}`,
     `Ket    : ${item.ket}`,
     `Total  : ${rp(bayar)}`,
+    '------------------------------',
     'Terima kasih!'
-  ].join('\n');
+  ];
+  const teks = lines.join('\n');
 
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(teks).then(() => alert('Struk berhasil disalin!')).catch(() => prompt('Salin struk:', teks));
@@ -88,6 +117,32 @@ window.copyStruk = (id) => {
 };
 window.hapusItem = hapusItem;
 
+btnToggleCfg.addEventListener('click', () => {
+  cfgBox.style.display = cfgBox.style.display === 'none' ? 'block' : 'none';
+});
+
+cfgForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  localStorage.setItem(CFG_KEY, JSON.stringify({
+    nama: cfgNama.value.trim() || 'POS KONTER & AGEN',
+    alamat: cfgAlamat.value.trim()
+  }));
+  applyCfg();
+  cfgBox.style.display = 'none';
+  alert('Profil toko tersimpan!');
+});
+
+btnBackup.addEventListener('click', () => {
+  const payload = { profil: getCfg(), transaksi: getData(), diekspor: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `backup-pos-agen-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
 form.addEventListener('submit', (e) => {
   e.preventDefault();
   const jenis = document.getElementById('jenis').value;
@@ -109,4 +164,5 @@ btnReset.addEventListener('click', () => {
   render();
 });
 
+applyCfg();
 render();

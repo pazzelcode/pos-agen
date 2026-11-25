@@ -9,10 +9,29 @@
 </head>
 <body>
 <header class="topbar">
-  <h1>POS KONTER & AGEN</h1>
-  <span id="tanggal-hari"></span>
+  <div>
+    <h1 id="nama-toko-judul">POS KONTER & AGEN</h1>
+    <small id="sub-toko" style="color:#94a3b8;font-size:.72rem"></small>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <span id="tanggal-hari"></span>
+    <button type="button" id="btn-toggle-cfg" style="background:#3a86ff;color:#fff;border:none;padding:5px 9px;border-radius:6px;font-size:.75rem;font-weight:700;cursor:pointer">Toko</button>
+  </div>
 </header>
 <main class="container">
+  <section id="cfg-box" class="card form-box" style="display:none">
+    <h2>Profil Konter / Agen</h2>
+    <form id="cfg-form">
+      <label>Nama Konter / Agen</label>
+      <input type="text" id="cfg-nama" placeholder="Cth: TOKO ALSAD / ALSAD LINK" required>
+      <label>Alamat / Info Singkat</label>
+      <input type="text" id="cfg-alamat" placeholder="Cth: Jl. Raya Sagaranten">
+      <div class="row">
+        <button type="submit" class="btn-primary">Simpan Profil</button>
+        <button type="button" id="btn-backup" style="background:#10b981;color:#052e16;border:none;padding:11px;border-radius:8px;font-weight:700;font-size:.85rem;cursor:pointer">Backup JSON</button>
+      </div>
+    </form>
+  </section>
   <section class="summary-grid">
     <div class="card">
       <small>Omzet / Masuk</small>
