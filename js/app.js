@@ -190,7 +190,7 @@ const render = () => {
     li.innerHTML = `
       <div class="trx-meta">
         <strong>${item.jenis}</strong>
-        <small>${[item.tujuan, item.ket].filter(Boolean).join(" • ")} • ${item.jam}</small>
+        <small>${[item.tujuan, item.ket].filter(Boolean).join(" • ")} • ${fmtJamTglPendek(item)}</small>
       </div>
       <div class="trx-amount">
         <span class="bayar">${rp(jual)}</span>
@@ -332,6 +332,18 @@ const getTodayISO = () => {
   return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
 };
 
+const BULAN_PEND = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+const fmtJamTglPendek = (item) => {
+  const jamRaw = String((item && item.jam) || "").trim();
+  const jamFmt = jamRaw ? jamRaw.replace(/:/g, ".") : "00.00";
+  const iso = normTrxDate(item || {});
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  if (!m) return jamFmt;
+  const thn2 = m[1].slice(-2);
+  const bln = BULAN_PEND[Math.max(0, Math.min(11, Number(m[2]) - 1))];
+  const tgl = String(Number(m[3]));
+  return jamFmt + " | " + tgl + " " + bln + " " + thn2;
+};
 const normTrxDate = (t) => {
   if (t && /^\d{4}-\d{2}-\d{2}$/.test(t.tglISO || "")) return t.tglISO;
   return getTodayISO();
