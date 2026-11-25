@@ -28,10 +28,7 @@
       <input type="text" id="cfg-alamat" placeholder="Cth: Jl. Raya Sagaranten">
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
         <button type="submit" class="btn-primary">Simpan</button>
-        <button type="button" id="btn-backup" style="background:#10b981;color:#052e16;border:none;padding:11px;border-radius:8px;font-weight:700;font-size:.8rem;cursor:pointer">Backup JSON</button>
-        <button type="button" id="btn-restore" style="background:#38bdf8;color:#082f49;border:none;padding:11px;border-radius:8px;font-weight:700;font-size:.8rem;cursor:pointer">Restore JSON</button>
       </div>
-      <input type="file" id="file-restore" accept="application/json,.json" style="display:none">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;padding:8px 10px;background:#0b132b;border:1px solid #334155;border-radius:8px;font-size:.78rem">
         <span>ID Perangkat: <strong id="info-dev-id" style="color:#ffd166">-</strong></span>
         <button type="button" id="btn-salin-id" style="background:#475569;color:#fff;border:none;padding:4px 9px;border-radius:6px;font-size:.72rem;font-weight:700;cursor:pointer">Salin ID</button>
@@ -50,9 +47,8 @@
           </label>
         </div>
         <div id="audit-ringkasan" style="font-size:.74rem;color:#94a3b8">Periode: belum dipilih</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-          <button type="button" id="btn-audit-csv" style="background:#0284c7;color:#fff;border:none;padding:7px;border-radius:6px;font-size:.75rem;font-weight:700;cursor:pointer">Tarik CSV Audit</button>
-          <button type="button" id="btn-audit-json" style="background:#7c3aed;color:#fff;border:none;padding:7px;border-radius:6px;font-size:.75rem;font-weight:700;cursor:pointer">Tarik JSON Audit</button>
+        <div style="display:grid;grid-template-columns:1fr;gap:6px">
+          <button type="button" id="btn-audit-csv" style="background:#0284c7;color:#fff;border:none;padding:8px;border-radius:6px;font-size:.78rem;font-weight:700;cursor:pointer">Tarik CSV Audit (Buka di Excel / WPS)</button>
         </div>
       </div>
     </form>

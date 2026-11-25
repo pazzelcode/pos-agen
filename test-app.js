@@ -19,7 +19,7 @@ const requiredIds = [
   "trx-form", "jenis", "ket", "jual", "modal", "laba-preview",
   "cari-trx", "trx-list", "total-trx", "info-dev-id", "btn-salin-id",
   "audit-box", "audit-bulan", "audit-dari", "audit-sampai",
-  "btn-audit-csv", "btn-audit-json", "btn-backup", "btn-restore", "file-restore", "btn-csv"
+  "btn-audit-csv", "btn-csv"
 ];
 for (const id of requiredIds) {
   if (html.includes(`id="${id}"`)) ok("ID HTML ditemukan: #" + id);
