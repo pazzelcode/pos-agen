@@ -3,6 +3,44 @@ const CFG_KEY = 'pos_agen_cfg_v1';
 const LIC_KEY = 'pos_agen_lic_v1';
 const DEV_KEY = 'pos_agen_dev_v1';
 
+const JENIS_KEY = "pos_agen_jenis_v1";
+const DEFAULT_JENIS = ["Transfer","Tarik tunai","E Wallet","Token PLN","Pulsa","Paket Data","Aksesoris","Lainnya"];
+const selectJenis = document.getElementById("jenis");
+const btnAddJenis = document.getElementById("btn-add-jenis");
+const getJenisList = () => {
+  try {
+    const raw = localStorage.getItem(JENIS_KEY);
+    if (!raw) return [...DEFAULT_JENIS];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed) || !parsed.length) return [...DEFAULT_JENIS];
+    return [...new Set([...DEFAULT_JENIS, ...parsed.map((x) => String(x || "").trim()).filter(Boolean)])];
+  } catch { return [...DEFAULT_JENIS]; }
+};
+const saveJenisList = (arr) => {
+  const clean = [...new Set(arr.map((x) => String(x || "").trim()).filter(Boolean))];
+  try { localStorage.setItem(JENIS_KEY, JSON.stringify(clean)); } catch {}
+  return clean;
+};
+const renderJenisOptions = (selectedVal) => {
+  if (!selectJenis) return;
+  const list = getJenisList();
+  selectJenis.innerHTML = list.map((j) => `<option value="${j.replace(/"/g, "&quot;")}">${j}</option>`).join("");
+  if (selectedVal && list.includes(selectedVal)) selectJenis.value = selectedVal;
+  else if (list.length) selectJenis.value = list[0];
+};
+renderJenisOptions();
+if (btnAddJenis) {
+  btnAddJenis.addEventListener("click", () => {
+    const nama = prompt("Masukkan nama layanan baru:");
+    if (!nama) return;
+    const bersih = nama.trim().replace(/s+/g, " ");
+    if (!bersih) return;
+    const updated = saveJenisList([...getJenisList(), bersih]);
+    renderJenisOptions(bersih);
+    if (updated.includes(bersih) && selectJenis) selectJenis.value = bersih;
+  });
+}
+
 const form = document.getElementById('trx-form');
 const listEl = document.getElementById('trx-list');
 const elMasuk = document.getElementById('total-masuk');

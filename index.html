@@ -71,12 +71,7 @@
     <h2>Input Transaksi</h2>
     <form id="trx-form">
       <label>Jenis Layanan</label>
-      <select id="jenis" required>
-        <option value="Pulsa & Data">Pulsa & Paket Data</option>
-        <option value="Transfer / Tarik Tunai">Transfer / Tarik Tunai</option>
-        <option value="E-Wallet & Token">E-Wallet & Token PLN</option>
-        <option value="Produk Fisik">Produk Fisik / Aksesoris</option>
-      </select>
+      <div style="display:flex;gap:8px;align-items:center;"><select id="jenis" required style="flex:1;"></select><button type="button" id="btn-add-jenis" title="Tambah Layanan" aria-label="Tambah Layanan" style="padding:8px 12px;font-weight:bold;cursor:pointer;">+</button></div>
       <label>Keterangan / Tujuan</label>
       <input type="text" id="ket" placeholder="Cth: nama/ barang/ 0812xxx/ Bri a.n budi" required>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
