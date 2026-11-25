@@ -26,10 +26,12 @@
       <input type="text" id="cfg-nama" placeholder="Cth: TOKO ALSAD / ALSAD LINK" required>
       <label>Alamat / Info Singkat</label>
       <input type="text" id="cfg-alamat" placeholder="Cth: Jl. Raya Sagaranten">
-      <div class="row">
-        <button type="submit" class="btn-primary">Simpan Profil</button>
-        <button type="button" id="btn-backup" style="background:#10b981;color:#052e16;border:none;padding:11px;border-radius:8px;font-weight:700;font-size:.85rem;cursor:pointer">Backup JSON</button>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+        <button type="submit" class="btn-primary">Simpan</button>
+        <button type="button" id="btn-backup" style="background:#10b981;color:#052e16;border:none;padding:11px;border-radius:8px;font-weight:700;font-size:.8rem;cursor:pointer">Backup JSON</button>
+        <button type="button" id="btn-restore" style="background:#38bdf8;color:#082f49;border:none;padding:11px;border-radius:8px;font-weight:700;font-size:.8rem;cursor:pointer">Restore JSON</button>
       </div>
+      <input type="file" id="file-restore" accept="application/json,.json" style="display:none">
     </form>
   </section>
   <section class="summary-grid">
@@ -80,6 +82,7 @@
       <h2>Riwayat Transaksi</h2>
       <div style="display:flex;gap:6px"><button type="button" id="btn-csv" style="background:#f59e0b;color:#111827;border:none;padding:6px 10px;border-radius:6px;font-size:.75rem;font-weight:700;cursor:pointer">Export CSV</button><button type="button" id="btn-reset" class="btn-danger">Reset Hari Ini</button></div>
     </div>
+    <input type="search" id="cari-trx" placeholder="Cari layanan, nama, nomor HP, atau bank..." style="margin-bottom:10px">
     <ul id="trx-list" class="trx-list"></ul>
   </section>
 </main>

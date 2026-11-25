@@ -11,6 +11,7 @@ const elTrx = document.getElementById('total-trx');
 const elTgl = document.getElementById('tanggal-hari');
 const btnReset = document.getElementById('btn-reset');
 const btnCsv = document.getElementById('btn-csv');
+const inputCari = document.getElementById('cari-trx');
 
 const inputJual = document.getElementById('jual');
 const inputModal = document.getElementById('modal');
@@ -24,6 +25,8 @@ const cfgAlamat = document.getElementById('cfg-alamat');
 const judulToko = document.getElementById('nama-toko-judul');
 const subToko = document.getElementById('sub-toko');
 const btnBackup = document.getElementById('btn-backup');
+const btnRestore = document.getElementById('btn-restore');
+const fileRestore = document.getElementById('file-restore');
 
 const rp = (n) => 'Rp' + Number(n || 0).toLocaleString('id-ID');
 
@@ -93,13 +96,22 @@ const hapusItem = (id) => {
 };
 
 const render = () => {
-  const rows = getData();
+  const allRows = getData();
+  const q = (inputCari ? inputCari.value : '').trim().toLowerCase();
+  const rows = q
+    ? allRows.filter((item) =>
+        String(item.jenis || '').toLowerCase().includes(q) ||
+        String(item.ket || '').toLowerCase().includes(q) ||
+        String(item.jam || '').toLowerCase().includes(q)
+      )
+    : allRows;
+
   let totalMasuk = 0;
   let totalLaba = 0;
 
   listEl.innerHTML = '';
   if (!rows.length) {
-    listEl.innerHTML = '<li class="trx-item"><small>Belum ada transaksi hari ini.</small></li>';
+    listEl.innerHTML = `<li class="trx-item"><small>${q ? 'Transaksi tidak ditemukan.' : 'Belum ada transaksi hari ini.'}</small></li>`;
   }
 
   rows.forEach((item) => {
@@ -132,6 +144,8 @@ const render = () => {
   elTrx.textContent = rows.length;
 };
 
+if (inputCari) inputCari.addEventListener('input', render);
+
 window.copyStruk = (id) => {
   const found = getData().find((x) => x.id === id);
   if (found) copyStruk(found);
@@ -162,6 +176,37 @@ btnBackup.addEventListener('click', () => {
   a.download = `backup-pos-agen-${new Date().toISOString().slice(0, 10)}.json`;
   a.click();
   URL.revokeObjectURL(url);
+});
+
+btnRestore.addEventListener('click', () => fileRestore.click());
+
+fileRestore.addEventListener('change', (e) => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const parsed = JSON.parse(reader.result);
+      const rows = Array.isArray(parsed) ? parsed : parsed.transaksi;
+      if (!Array.isArray(rows)) throw new Error('Format JSON tidak sesuai');
+      if (!confirm(`Pulihkan ${rows.length} transaksi dari file backup? Data saat ini akan diganti.`)) return;
+      saveData(rows);
+      if (parsed && !Array.isArray(parsed) && parsed.profil) {
+        localStorage.setItem(CFG_KEY, JSON.stringify({
+          nama: parsed.profil.nama || 'POS KONTER & AGEN',
+          alamat: parsed.profil.alamat || ''
+        }));
+        applyCfg();
+      }
+      render();
+      alert('Data berhasil di-restore!');
+    } catch {
+      alert('File backup JSON tidak valid.');
+    } finally {
+      fileRestore.value = '';
+    }
+  };
+  reader.readAsText(file);
 });
 
 btnCsv.addEventListener('click', () => {
