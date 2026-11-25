@@ -29,8 +29,12 @@ input:focus,select:focus{outline:none;border-color:#ffd166}
 .trx-amount .untung{font-size:.75rem;color:#4ade80}
 
 /* spacing-form-v17 */
-#trx-form label{display:block;font-size:.78rem;color:#cbd5e1;margin-top:6px;margin-bottom:2px;line-height:1.2}
+#trx-form label{display:block;font-size:.78rem;color:#cbd5e1;margin-top:6px;margin-bottom:-1px;line-height:1.2}
 #trx-form label:first-child{margin-top:0}
 #trx-form input,#trx-form select{width:100%;box-sizing:border-box;margin-bottom:0}
 #trx-form .grid-3>div{display:flex;flex-direction:column}
-#trx-form .grid-3 label{margin-top:0;margin-bottom:2px}
+#trx-form .grid-3 label{margin-top:0;margin-bottom:3px}
+
+
+#trx-form .grid-harga>div{display:flex;flex-direction:column}
+#trx-form .grid-harga label{margin-top:0;margin-bottom:5px}
