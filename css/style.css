@@ -18,7 +18,7 @@ input:focus,select:focus{outline:none;border-color:#ffd166}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .btn-primary{background:#3a86ff;color:#fff;border:none;padding:11px;border-radius:8px;font-weight:700;font-size:.9rem;cursor:pointer}
 .btn-primary:active{transform:scale(.99)}
-.list-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.list-head{display:flex;flex-direction:column;align-items:stretch;gap:8px;margin-bottom:10px}
 .btn-danger{background:#ef233c;color:#fff;border:none;padding:6px 10px;border-radius:6px;font-size:.75rem;font-weight:600;cursor:pointer}
 .trx-list{list-style:none;display:flex;flex-direction:column;gap:8px}
 .trx-item{background:#0b132b;border:1px solid #2b3a55;border-radius:8px;padding:10px;display:flex;justify-content:space-between;align-items:center;gap:8px}
@@ -39,7 +39,7 @@ input:focus,select:focus{outline:none;border-color:#ffd166}
 #trx-form .grid-harga>div{display:flex;flex-direction:column}
 #trx-form .grid-harga label{margin-top:0;margin-bottom:5px}
 
-.trx-aksi-3{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;width:100%;max-width:440px}
+.trx-aksi-3{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;width:100%;max-width:none}
 .trx-aksi-3 button,.trx-aksi-3 a{display:flex;align-items:center;justify-content:center;padding:7px 6px;border-radius:6px;font-size:.72rem;font-weight:700;cursor:pointer;border:none;white-space:nowrap;text-decoration:none;line-height:1.1}
 .btn-riwayat{background:#2563eb;color:#fff}
 .btn-riwayat.aktif{background:#1d4ed8;box-shadow:inset 0 0 0 2px #fde047}
