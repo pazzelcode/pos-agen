@@ -447,8 +447,8 @@ const syncBackupReminderUI = () => {
   const last = getStoreVal(LAST_BACKUP_KEY);
   const today = (typeof getTodayISO === "function" ? getTodayISO() : toLocalISO(new Date()));
   const statusTeks = last
-    ? (last === today ? "Backup terakhir: Hari ini (aman)." : "Backup terakhir: " + last + " — disarankan backup ulang hari ini.")
-    : "Belum ada catatan backup — disarankan segera backup sekarang.";
+    ? (last === today ? "Backup terakhir: Hari ini (aman)." : "Backup terakhir: " + last + " — disarankan backup ke HP hari ini.")
+    : "Belum ada catatan backup — disarankan segera backup ke HP sekarang.";
   el.innerHTML = "<strong>Penting:</strong> Backup rutin ke penyimpanan HP atau Google Drive agar data transaksi & bon tidak hilang. File disimpan sebagai <code>backup-pos-agen.json</code> agar mudah menimpa cadangan lama tanpa menumpuk file.<br><span style=\"color:" + (last === today ? "#34d399" : "#fbbf24") + "\">" + statusTeks + "</span>";
 };
 if (btnBackup) {
@@ -466,7 +466,7 @@ if (btnBackup) {
     if (ok) {
       setStoreVal(LAST_BACKUP_KEY, tgl);
       syncBackupReminderUI();
-alert("Backup Data POS Agen (backup-pos-agen.json) berhasil disimpan ke folder Download HP. Anda juga bisa menimpanya di Google Drive agar tidak menumpuk file.");
+alert("Backup ke HP (backup-pos-agen.json) berhasil disimpan ke folder Download HP. Anda juga bisa menimpanya di Google Drive agar tidak menumpuk file.");
     }
   });
 }
@@ -831,7 +831,7 @@ if (gasInput) {
 if (btnDrive) {
   btnDrive.addEventListener("click", async () => {
     const url = ((gasInput && gasInput.value) || readGasUrl() || "").trim();
-    if (!url) { alert("Isi URL Google Apps Script terlebih dahulu atau gunakan Backup Data POS Agen ke HP."); return; }
+    if (!url) { alert("Isi URL Google Apps Script terlebih dahulu atau gunakan Backup ke HP ke HP."); return; }
     writeGasUrl(url);
     const payload = { app: "pos-agen", version: 1, exportedAt: new Date().toISOString(), cfg: getCfg(), jenis: getJenisList(), transaksi: getData() };
     try {
