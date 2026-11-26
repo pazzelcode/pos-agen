@@ -84,6 +84,10 @@ const renderTglStrip = (rows) => {
     const aktif = iso === tanggalDipilihISO ? " aktif" : "";
     return "<button type=\"button\" class=\"tgl-item" + aktif + "\" data-iso=\"" + iso + "\"><span class=\"tgl-bulat\">" + dt.getDate() + "</span><span class=\"tgl-hari\">" + HARI_PENDEK[dt.getDay()] + "</span></button>";
   }).join("");
+  const aktifEl = tglStripList.querySelector(".tgl-item.aktif");
+  if (aktifEl && typeof aktifEl.scrollIntoView === "function") {
+    requestAnimationFrame(() => aktifEl.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" }));
+  }
   tglStripList.querySelectorAll(".tgl-item").forEach((el) => {
     el.addEventListener("click", () => {
       tanggalDipilihISO = el.dataset.iso;
