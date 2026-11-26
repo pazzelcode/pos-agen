@@ -723,8 +723,9 @@ const initAuditUI = () => {
     }
     if (box) {
       const perJenis = getPerJenis(list);
+      const cleanRp = (v) => String(rp(v) || "0").replace(/^Rp\s*/i, "").trim();
       box.innerHTML = perJenis.length
-        ? "<strong>Laba & Omzet per Layanan:</strong><br>" + perJenis.map((x) => x.jenis + " (" + x.cnt + "x): Omzet Rp" + rp(x.jual) + " | Laba <strong>Rp" + rp(x.laba) + "</strong>").join("<br>")
+        ? "<strong>Laba & Omzet per Layanan:</strong><br>" + perJenis.map((x) => x.jenis + " (" + x.cnt + "x): Omzet Rp" + cleanRp(x.jual) + " | Laba <strong>Rp" + cleanRp(x.laba) + "</strong>").join("<br>")
         : "Belum ada rincian layanan pada rentang tanggal ini.";
     }
   };
