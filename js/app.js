@@ -298,8 +298,8 @@ const hapusItem = (id) => {
 
 const render = () => {
   const allRows = getData();
-  renderMonitorBon(allRows);
-  if (riwayatFilterAktif) renderTglStrip(allRows);
+  try { renderMonitorBon(allRows); } catch (e) { console.error(e); }
+  try { if (riwayatFilterAktif) renderTglStrip(allRows); } catch (e) { console.error(e); }
   const q = (inputCari ? inputCari.value : '').trim().toLowerCase();
   const rows = allRows.filter((item) => {
     const matchTgl = !riwayatFilterAktif || normTrxDate(item) === tanggalDipilihISO;
