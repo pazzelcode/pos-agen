@@ -696,6 +696,7 @@ const initAuditUI = () => {
   const btnJson = document.getElementById("btn-audit-json");
   if (!dariEl || !sampaiEl || !ringkasEl) return;
 
+  const fmtRp = (n) => String(rp(n) || "0").replace(/^Rp\s*/i, "").trim() || "0";
   const getPerJenis = (list) => {
     const map = new Map();
     list.forEach((r) => {
@@ -712,7 +713,7 @@ const initAuditUI = () => {
     const omzet = list.reduce((a, b) => a + Number(b.jual || 0), 0);
     const modal = list.reduce((a, b) => a + Number(b.modal || 0), 0);
     const laba = list.reduce((a, b) => a + Number(b.laba || 0), 0);
-    ringkasEl.textContent = list.length + " trx | Modal Rp" + rp(modal) + " | Omzet Rp" + rp(omzet) + " | Laba Rp" + rp(laba);
+    ringkasEl.textContent = list.length + " trx | Modal Rp" + fmtRp(modal) + " | Omzet Rp" + fmtRp(omzet) + " | Laba Rp" + fmtRp(laba);
     let box = document.getElementById("audit-rincian-layanan");
     if (!box && ringkasEl.parentNode) {
       box = document.createElement("div");
