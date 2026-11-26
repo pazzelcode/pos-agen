@@ -1,6 +1,6 @@
-const CACHE_NAME = "pos-agen-v54";
+const CACHE_NAME = "pos-agen-v55";
 const ASSETS = [
-  "./",
+  "./icon/icon-192.png", "./icon/icon-512.png", "./",
   "./index.html",
   "./bon.html",
   "./css/style.css",
