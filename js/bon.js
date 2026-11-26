@@ -45,6 +45,17 @@ window.aksiBatalLunas = (id) => {
   const rows = bacaTrx().map((r) => String(r.id) === String(id) ? Object.assign({}, r, { statusBon: "belum_lunas", tglLunas: "" }) : r);
   simpanTrx(rows);
   updBonLaba();
+
+window.aksiSalinRekapBon = () => {
+  const teks = window._rekapBonTeks || "";
+  if (!teks) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(teks).then(() => alert("Rekap bon disalin.")).catch(() => alert(teks));
+  } else {
+    alert(teks);
+  }
+};
+
 renderHalamanBon();
 };
 window.aksiHapusBon = (id) => {
@@ -169,8 +180,11 @@ function renderHalamanBon() {
       mapPel.set(nama, cur);
     });
     const daftarPel = Array.from(mapPel.values()).sort((a, b) => b.total - a.total);
+    window._rekapBonTeks = daftarPel.length
+      ? "Rekap Bon Aktif per Pelanggan:" + nl + daftarPel.map((p) => "- " + p.nama + " (" + p.cnt + " nota): " + rp(p.total) + (p.tempo ? " [Tempo: " + p.tempo + "]" : "")).join(nl)
+      : "";
     rekapEl.innerHTML = daftarPel.length
-      ? "<div style=\"padding:8px 10px;border-radius:8px;background:rgba(15,23,42,.7);border:1px solid rgba(148,163,184,.22);font-size:.75rem;line-height:1.5\"><strong>Rekap Bon Aktif per Pelanggan:</strong><br>" + daftarPel.map((p) => p.nama + " (" + p.cnt + " nota): <strong>" + rp(p.total) + "</strong>" + (p.tempo ? " • Tempo: " + p.tempo : "")).join("<br>") + "</div>"
+      ? "<div style=\"padding:8px 10px;border-radius:8px;background:rgba(15,23,42,.7);border:1px solid rgba(148,163,184,.22);font-size:.75rem;line-height:1.5\"><div style=\"display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:4px\"><strong>Rekap Bon Aktif per Pelanggan:</strong><button type=\"button\" class=\"bon-btn-tunda\" onclick=\"aksiSalinRekapBon()\">Salin Rekap Bon</button></div>" + daftarPel.map((p) => p.nama + " (" + p.cnt + " nota): <strong>" + rp(p.total) + "</strong>" + (p.tempo ? " • Tempo: " + p.tempo : "")).join("<br>") + "</div>"
       : "";
   }
 const elAktif = document.getElementById("bon-stat-aktif");
