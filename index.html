@@ -17,6 +17,7 @@
   </div>
   <div style="display:flex;align-items:center;gap:8px">
     <span id="tanggal-hari"></span>
+    <button type="button" id="btn-install-pwa" style="background:#facc15;color:#0b132b;border:none;padding:5px 9px;border-radius:6px;font-size:.75rem;font-weight:700;cursor:pointer;white-space:nowrap">Install Aplikasi</button>
     <button type="button" id="btn-toggle-cfg" style="background:#3a86ff;color:#fff;border:none;padding:5px 9px;border-radius:6px;font-size:.75rem;font-weight:700;cursor:pointer">Rekap & Toko</button>
   </div>
 </header>
@@ -132,5 +133,25 @@
 </main>
 <script src="js/app.js"></script>
 <script>if("serviceWorker"in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));}</script>
+<script>
+(function(){
+  const btn=document.getElementById("btn-install-pwa");
+  if(!btn)return;
+  let deferredPrompt=null;
+  const setInstalled=()=>{btn.textContent="Aplikasi Terinstall";btn.disabled=true;btn.style.opacity="0.85";btn.style.cursor="default";btn.style.background="#22c55e";btn.style.color="#052e16";};
+  const isStandalone=()=>window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true;
+  if(isStandalone())setInstalled();
+  window.addEventListener("beforeinstallprompt",(e)=>{e.preventDefault();deferredPrompt=e;btn.disabled=false;btn.style.opacity="1";btn.style.cursor="pointer";});
+  window.addEventListener("appinstalled",()=>{deferredPrompt=null;setInstalled();});
+  btn.addEventListener("click",async()=>{
+    if(isStandalone()){setInstalled();return;}
+    if(!deferredPrompt){alert("Gunakan menu browser (Titik tiga > Install aplikasi / Tambahkan ke layar utama) jika prompt belum muncul.");return;}
+    deferredPrompt.prompt();
+    const res=await deferredPrompt.userChoice;
+    deferredPrompt=null;
+    if(res&&res.outcome==="accepted")setInstalled();
+  });
+})();
+</script>
 </body>
 </html>
