@@ -45,18 +45,37 @@ window.aksiBatalLunas = (id) => {
   const rows = bacaTrx().map((r) => String(r.id) === String(id) ? Object.assign({}, r, { statusBon: "belum_lunas", tglLunas: "" }) : r);
   simpanTrx(rows);
   updBonLaba();
+  renderHalamanBon();
+};
 
-window.aksiSalinRekapBon = () => {
-  const teks = window._rekapBonTeks || "";
+const salinTeksAman = (teks) => {
   if (!teks) return;
+  const fallbackCopy = () => {
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = teks;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      ta.setSelectionRange(0, teks.length);
+      const ok = document.execCommand && document.execCommand("copy");
+      document.body.removeChild(ta);
+      alert(ok ? "Rekap bon disalin." : teks);
+    } catch (e) {
+      alert(teks);
+    }
+  };
   if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(teks).then(() => alert("Rekap bon disalin.")).catch(() => alert(teks));
+    navigator.clipboard.writeText(teks).then(() => alert("Rekap bon disalin.")).catch(fallbackCopy);
   } else {
-    alert(teks);
+    fallbackCopy();
   }
 };
 
-renderHalamanBon();
+window.aksiSalinRekapBon = () => {
+  salinTeksAman(window._rekapBonTeks || "");
 };
 window.aksiHapusBon = (id) => {
   if (!confirm("Hapus catatan bon ini?")) return;
@@ -173,11 +192,13 @@ function renderHalamanBon() {
     const mapPel = new Map();
     semuaBon.filter((r) => r.statusBon !== "lunas").forEach((r) => {
       const nama = (r.tujuan || "Pelanggan").trim() || "Pelanggan";
-      const cur = mapPel.get(nama) || { nama, cnt: 0, total: 0, tempo: r.jatuhTempo || "" };
-      cur.cnt += 1;
-      cur.total += Number(r.jual) || 0;
-      if (r.jatuhTempo && (!cur.tempo || r.jatuhTempo < cur.tempo)) cur.tempo = r.jatuhTempo;
-      mapPel.set(nama, cur);
+      const waRaw = String(r.waPelanggan || "").trim();
+          const cur = mapPel.get(nama) || { nama, wa: waRaw, cnt: 0, total: 0, tempo: r.jatuhTempo || "" };
+          if (!cur.wa && waRaw) cur.wa = waRaw;
+          cur.cnt += 1;
+          cur.total += Number(r.jual) || 0;
+          if (r.jatuhTempo && (!cur.tempo || r.jatuhTempo < cur.tempo)) cur.tempo = r.jatuhTempo;
+          mapPel.set(nama, cur);
     });
     const daftarPel = Array.from(mapPel.values()).sort((a, b) => b.total - a.total);
     window._rekapBonTeks = daftarPel.length

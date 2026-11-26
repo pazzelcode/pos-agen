@@ -1,4 +1,4 @@
-const CACHE_NAME = "pos-agen-v52";
+const CACHE_NAME = "pos-agen-v53";
 const ASSETS = [
   "./",
   "./index.html",
