@@ -59,8 +59,12 @@
       <strong id="total-masuk">Rp0</strong>
     </div>
     <div class="card accent">
-      <small>Laba / Fee Bersih</small>
+      <small>Laba Tunai</small>
       <strong id="total-laba">Rp0</strong>
+    </div>
+    <div class="card">
+      <small>Bon Aktif</small>
+      <strong id="total-bon-aktif">Rp0</strong>
     </div>
     <div class="card">
       <small>Jumlah Trx</small>
@@ -90,6 +94,19 @@
           <input type="text" id="laba-preview" value="Rp0" readonly style="background:#1e293b;color:#4ade80;font-weight:700">
         </div>
       </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;align-items:end">
+        <div>
+          <label>Metode Bayar</label>
+          <select id="metode-bayar">
+            <option value="tunai" selected>Tunai</option>
+            <option value="bon">Bon</option>
+          </select>
+        </div>
+        <div id="wrap-jatuh-tempo" style="display:none">
+          <label>Tenggang Bayar</label>
+          <input type="date" id="jatuh-tempo">
+        </div>
+      </div>
       <button type="submit" class="btn-primary" style="margin-top:8px;">Simpan Transaksi</button>
     </form>
   </section>
@@ -100,6 +117,7 @@
     </div>
     <input type="search" id="cari-trx" placeholder="Cari layanan, nama, nomor HP, atau bank..." style="margin-bottom:10px">
     <div id="riwayat-tgl-wrap" class="tgl-strip-wrap" style="display:none"><div class="tgl-strip-top"><span id="tgl-strip-bulan" class="tgl-strip-bulan"></span><button type="button" id="btn-tgl-hari-ini" class="tgl-strip-reset">Hari Ini</button></div><div id="tgl-strip-list" class="tgl-strip-list"></div></div>
+    <div id="monitor-bon-wrap" class="bon-box" style="display:none"><div class="bon-head"><strong>Monitor Pelanggan Bon</strong><span id="bon-ringkasan" class="bon-ringkasan"></span></div><div id="monitor-bon-list" class="bon-list"></div></div>
     <ul id="trx-list" class="trx-list"></ul>
   </section>
 </main>

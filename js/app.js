@@ -45,6 +45,57 @@ const form = document.getElementById('trx-form');
 const listEl = document.getElementById('trx-list');
 const elMasuk = document.getElementById('total-masuk');
 const elLaba = document.getElementById('total-laba');
+const elBonAktif = document.getElementById('total-bon-aktif');
+const bonWrap = document.getElementById('monitor-bon-wrap');
+const bonRingkasan = document.getElementById('bon-ringkasan');
+const bonListEl = document.getElementById('monitor-bon-list');
+const selisihHariISO = (targetISO, baseISO) => {
+  if (!targetISO) return 999;
+  const a = new Date(targetISO + "T00:00:00").getTime();
+  const b = new Date(baseISO + "T00:00:00").getTime();
+  return Math.round((a - b) / 86400000);
+};
+window.lunasiBon = (id) => {
+  const rows = getData();
+  const idx = rows.findIndex((x) => String(x.id) === String(id));
+  if (idx === -1) return;
+  rows[idx].metode = "bon";
+  rows[idx].statusBon = "lunas";
+  rows[idx].tglLunas = (typeof getTodayISO === "function" ? getTodayISO() : toLocalISO(new Date()));
+  saveData(rows);
+  render();
+};
+window.tagihBonWA = (id) => {
+  const item = getData().find((x) => String(x.id) === String(id));
+  if (!item) return;
+  const nama = item.tujuan || "Pelanggan";
+  const msg = "Halo " + nama + ", pengingat tagihan " + (item.jenis || "transaksi") + " sebesar " + rupiah(item.jual || 0) + " jatuh tempo " + (item.jatuhTempo || "-") + ". Terima kasih.";
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(msg).catch(() => {});
+  const noMatch = String((item.tujuan || "") + " " + (item.ket || "")).match(/08\d{8,13}|628\d{8,13}/);
+  if (noMatch) {
+    const wa = noMatch[0].startsWith("0") ? "62" + noMatch[0].slice(1) : noMatch[0];
+    window.open("https://wa.me/" + wa + "?text=" + encodeURIComponent(msg), "_blank");
+  } else {
+    alert("Pesan tagihan disalin:\n" + msg);
+  }
+};
+const renderMonitorBon = (allRows) => {
+  if (!bonWrap || !bonListEl || !bonRingkasan) return;
+  const todayStr = (typeof getTodayISO === "function" ? getTodayISO() : toLocalISO(new Date()));
+  const aktif = (allRows || []).filter((r) => r.metode === "bon" && r.statusBon !== "lunas");
+  if (!aktif.length) { bonWrap.style.display = "none"; bonListEl.innerHTML = ""; return; }
+  bonWrap.style.display = "block";
+  const totalPiutang = aktif.reduce((s, r) => s + Number(r.jual || 0), 0);
+  bonRingkasan.textContent = aktif.length + " trx • " + rupiah(totalPiutang);
+  bonListEl.innerHTML = aktif.map((r) => {
+    const diff = selisihHariISO(r.jatuhTempo, todayStr);
+    let badge = "<span class=\"bon-badge aman\">Sisa " + diff + " hr</span>";
+    if (diff < 0) badge = "<span class=\"bon-badge lewat\">Lewat " + Math.abs(diff) + " hr</span>";
+    else if (diff === 0) badge = "<span class=\"bon-badge hari-ini\">Hari Ini</span>";
+    const labelPelanggan = [r.tujuan, r.jenis].filter(Boolean).join(" • ") || "Bon";
+    return "<div class=\"bon-item\"><div><div><strong>" + labelPelanggan + "</strong>" + badge + "</div><small>" + rupiah(r.jual || 0) + " • Tempo: " + (r.jatuhTempo || "-") + "</small></div><div class=\"bon-aksi\"><button type=\"button\" class=\"bon-btn-lunas\" onclick=\"lunasiBon('" + r.id + "')\">Lunas</button><button type=\"button\" class=\"bon-btn-wa\" onclick=\"tagihBonWA('" + r.id + "')\">WA</button></div></div>";
+  }).join("");
+};
 const elTrx = document.getElementById('total-trx');
 const elTgl = document.getElementById('tanggal-hari');
 const btnReset = document.getElementById('btn-reset');
@@ -100,6 +151,27 @@ const inputCari = document.getElementById('cari-trx');
 const inputJual = document.getElementById('jual');
 const inputModal = document.getElementById('modal');
 const labaPreview = document.getElementById('laba-preview');
+const inputMetode = document.getElementById('metode-bayar');
+const wrapJatuhTempo = document.getElementById('wrap-jatuh-tempo');
+const inputJatuhTempo = document.getElementById('jatuh-tempo');
+const getPlusHariISO = (hari) => {
+  const d = new Date();
+  d.setDate(d.getDate() + (Number(hari) || 0));
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const t = String(d.getDate()).padStart(2, "0");
+  return y + "-" + m + "-" + t;
+};
+const syncMetodeUI = () => {
+  const isBon = inputMetode && inputMetode.value === "bon";
+  if (wrapJatuhTempo) wrapJatuhTempo.style.display = isBon ? "block" : "none";
+  if (isBon && inputJatuhTempo && !inputJatuhTempo.value) {
+    inputJatuhTempo.value = getPlusHariISO(3);
+  }
+};
+if (inputMetode) {
+  inputMetode.addEventListener("change", syncMetodeUI);
+}
 
 const btnToggleCfg = document.getElementById('btn-toggle-cfg');
 const cfgBox = document.getElementById('cfg-box');
@@ -206,6 +278,7 @@ const hapusItem = (id) => {
 
 const render = () => {
   const allRows = getData();
+  renderMonitorBon(allRows);
   if (riwayatFilterAktif) renderTglStrip(allRows);
   const q = (inputCari ? inputCari.value : '').trim().toLowerCase();
   const rows = allRows.filter((item) => {
@@ -221,7 +294,8 @@ const render = () => {
   });
 
   let totalMasuk = 0;
-  let totalLaba = 0;
+  let totalLabaTunai = 0;
+  let totalBonAktif = 0;
 
   listEl.innerHTML = '';
   if (!rows.length) {
@@ -233,14 +307,14 @@ const render = () => {
     const jual = Number(item.jual ?? (modal + (Number(item.laba) || 0)));
     const laba = Number(item.laba ?? (jual - modal));
     totalMasuk += jual;
-    totalLaba += laba;
+    totalLabaTunai += laba;
 
     const li = document.createElement('li');
     li.className = 'trx-item';
     li.innerHTML = `
       <div class="trx-meta">
         <strong>${item.jenis}</strong>
-        <small>${[item.tujuan, item.ket].filter(Boolean).join(" • ")} • ${fmtJamTglPendek(item)}</small>
+        <small>${[item.tujuan, item.ket, item.metode === "bon" ? (item.statusBon === "lunas" ? "[BON LUNAS]" : "[BON • Tempo " + (item.jatuhTempo || "-") + "]") : ""].filter(Boolean).join(" • ")} • ${fmtJamTglPendek(item)}</small>
       </div>
       <div class="trx-amount">
         <span class="bayar">${rp(jual)}</span>
@@ -254,7 +328,7 @@ const render = () => {
   });
 
   elMasuk.textContent = rp(totalMasuk);
-  elLaba.textContent = (totalLaba < 0 ? '-' : '') + rp(Math.abs(totalLaba));
+  elLaba.textContent = (totalLabaTunai < 0 ? '-' : '') + rp(Math.abs(totalLabaTunai));
   elTrx.textContent = rows.length;
 };
 
@@ -300,7 +374,10 @@ btnCsv.addEventListener('click', () => {
       const modal = Number(r.modal) || 0;
       const jual = Number(r.jual ?? (modal + (Number(r.laba) || 0)));
       const laba = Number(r.laba ?? (jual - modal));
-      return [normTrxDate(r), r.jam || '', r.jenis || '', r.tujuan || '', r.ket || '', jual, modal, laba].map(esc).join(';');
+      const metode = r.metode === "bon" ? "bon" : "tunai";
+      const statusBon = metode === "bon" ? (r.statusBon === "lunas" ? "lunas" : "belum") : "lunas";
+      const jatuhTempo = metode === "bon" ? (r.jatuhTempo || "") : "";
+      return [normTrxDate(r), r.jam || '', r.jenis || '', r.tujuan || '', r.ket || '', jual, modal, laba, metode, statusBon, jatuhTempo].map(esc).join(';');
     })
   ];
   const blob = new Blob(['\uFEFF' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
@@ -323,10 +400,15 @@ form.addEventListener('submit', (e) => {
   const laba = jual - modal;
 
   const jam = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+  const metode = (inputMetode && inputMetode.value === "bon") ? "bon" : "tunai";
+  const statusBon = metode === "bon" ? "belum" : "lunas";
+  const jatuhTempo = metode === "bon" ? ((inputJatuhTempo && inputJatuhTempo.value) || getPlusHariISO(3)) : "";
   const rows = getData();
-  rows.unshift({ id: Date.now(), jenis, tujuan, ket, jual, modal, laba, jam, tglISO: getTodayISO() });
+  rows.unshift({ id: Date.now(), jenis, tujuan, ket, jual, modal, laba, jam, tglISO: getTodayISO(), metode, statusBon, jatuhTempo });
   saveData(rows);
   form.reset();
+  if (inputJatuhTempo) inputJatuhTempo.value = "";
+  syncMetodeUI();
   hitungLaba();
   render();
 });
