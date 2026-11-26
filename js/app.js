@@ -669,12 +669,36 @@ const initAuditUI = () => {
   const btnJson = document.getElementById("btn-audit-json");
   if (!dariEl || !sampaiEl || !ringkasEl) return;
 
+  const getPerJenis = (list) => {
+    const map = new Map();
+    list.forEach((r) => {
+      const k = (r.jenis || "Lainnya").trim() || "Lainnya";
+      const cur = map.get(k) || { jenis: k, cnt: 0, modal: 0, jual: 0, laba: 0 };
+      cur.cnt += 1; cur.modal += Number(r.modal || 0); cur.jual += Number(r.jual || 0); cur.laba += Number(r.laba || 0);
+      map.set(k, cur);
+    });
+    return Array.from(map.values()).sort((a, b) => b.laba - a.laba || b.jual - a.jual);
+  };
+
   const updateSummary = () => {
     const list = filterAuditTrx(dariEl.value, sampaiEl.value);
     const omzet = list.reduce((a, b) => a + Number(b.jual || 0), 0);
     const modal = list.reduce((a, b) => a + Number(b.modal || 0), 0);
     const laba = list.reduce((a, b) => a + Number(b.laba || 0), 0);
     ringkasEl.textContent = list.length + " trx | Modal Rp" + rp(modal) + " | Omzet Rp" + rp(omzet) + " | Laba Rp" + rp(laba);
+    let box = document.getElementById("audit-rincian-layanan");
+    if (!box && ringkasEl.parentNode) {
+      box = document.createElement("div");
+      box.id = "audit-rincian-layanan";
+      box.style.cssText = "margin-top:8px;padding:8px 10px;border-radius:8px;background:rgba(15,23,42,.75);border:1px solid rgba(148,163,184,.22);font-size:.74rem;line-height:1.5;color:#cbd5e1";
+      ringkasEl.insertAdjacentElement("afterend", box);
+    }
+    if (box) {
+      const perJenis = getPerJenis(list);
+      box.innerHTML = perJenis.length
+        ? "<strong>Laba & Omzet per Layanan:</strong><br>" + perJenis.map((x) => x.jenis + " (" + x.cnt + "x): Omzet Rp" + rp(x.jual) + " | Laba <strong>Rp" + rp(x.laba) + "</strong>").join("<br>")
+        : "Belum ada rincian layanan pada rentang tanggal ini.";
+    }
   };
 
   if (bulanEl && !bulanEl.dataset.bound) {
@@ -704,6 +728,7 @@ const initAuditUI = () => {
       const modal = list.reduce((a, b) => a + Number(b.modal || 0), 0);
       const laba = list.reduce((a, b) => a + Number(b.laba || 0), 0);
       const escCell = (v) => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+      const perJenisRows = getPerJenis(list).map((x) => [x.jenis, x.cnt, x.modal, x.jual, x.laba].map(escCell).join(","));
       const rows = [
         ["Tanggal", "Jam", "Layanan", "Keterangan", "Modal", "Harga Jual", "Laba"],
         ...list.map((t) => {
