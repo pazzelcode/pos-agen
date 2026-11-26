@@ -488,6 +488,8 @@ if (btnRestore && fileRestore) {
           alert("File backup tidak sesuai.");
           return;
         }
+        const infoTgl = (parsed && !Array.isArray(parsed) && parsed.exportedAt) ? (" (dibuat: " + String(parsed.exportedAt).slice(0, 10) + ")") : "";
+        if (!confirm("Pulihkan " + rows.length + " transaksi" + infoTgl + "? Data saat ini di perangkat akan diganti.")) return;
         saveData(rows);
         if (parsed && !Array.isArray(parsed)) {
           if (parsed.cfg && typeof parsed.cfg === "object") {
@@ -564,8 +566,16 @@ form.addEventListener('submit', (e) => {
 });
 
 btnReset.addEventListener('click', () => {
-  if (!confirm('Hapus semua riwayat transaksi yang tampil?')) return;
-  saveData([]);
+  const today = (typeof getTodayISO === "function" ? getTodayISO() : toLocalISO(new Date()));
+  const rows = getData();
+  const hariIni = rows.filter((r) => normTrxDate(r) === today);
+  if (!hariIni.length) {
+    alert("Tidak ada transaksi pada tanggal hari ini (" + today + ").");
+    return;
+  }
+  const omzetHariIni = hariIni.reduce((s, r) => s + (Number(r.jual) || 0), 0);
+  if (!confirm("Reset " + hariIni.length + " transaksi hari ini (" + today + ", total " + rp(omzetHariIni) + ")? Riwayat tanggal lain tetap aman.")) return;
+  saveData(rows.filter((r) => normTrxDate(r) !== today));
   render();
 });
 
