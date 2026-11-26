@@ -466,6 +466,33 @@ if (btnBackup) {
     if (ok) {
       setStoreVal(LAST_BACKUP_KEY, tgl);
       syncBackupReminderUI();
+const GAS_URL_KEY = "pos_agen_gas_url_v1";
+const gasInput = document.getElementById("cfg-gas-url");
+const btnDrive = document.getElementById("btn-kirim-drive");
+if (gasInput) {
+  gasInput.value = getStoreVal(GAS_URL_KEY) || "";
+  gasInput.addEventListener("change", () => setStoreVal(GAS_URL_KEY, gasInput.value.trim()));
+}
+if (btnDrive) {
+  btnDrive.addEventListener("click", async () => {
+    const url = ((gasInput && gasInput.value) || getStoreVal(GAS_URL_KEY) || "").trim();
+    if (!url) { alert("Isi URL Google Apps Script terlebih dahulu atau gunakan Backup Data POS Agen ke HP."); return; }
+    setStoreVal(GAS_URL_KEY, url);
+    const payload = { app: "pos-agen", version: 1, exportedAt: new Date().toISOString(), cfg: getCfg(), jenis: getJenisList(), transaksi: getData() };
+    try {
+      btnDrive.disabled = true; btnDrive.textContent = "Mengirim ke Drive...";
+      await fetch(url, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ filename: "backup-pos-agen.json", content: JSON.stringify(payload, null, 2) }) });
+      const tgl = (typeof getTodayISO === "function" ? getTodayISO() : toLocalISO(new Date()));
+      setStoreVal(LAST_BACKUP_KEY, tgl); syncBackupReminderUI();
+      alert("Permintaan kirim backup-pos-agen.json ke Google Drive telah dikirim.");
+    } catch (e) {
+      alert("Gagal mengirim ke Drive. Cek koneksi atau URL Apps Script.");
+    } finally {
+      btnDrive.disabled = false; btnDrive.textContent = "Kirim ke Drive (Timpa backup-pos-agen.json)";
+    }
+  });
+}
+
       alert("Backup Data POS Agen (backup-pos-agen.json) berhasil disimpan ke folder Download HP. Anda juga bisa menimpanya di Google Drive agar tidak menumpuk file.");
     }
   });

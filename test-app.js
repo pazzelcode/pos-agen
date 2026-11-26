@@ -117,5 +117,10 @@ if (fs.existsSync("js/bon.js")) {
   new Function(bonJs);
   console.log("[OK]  Sintaks JS valid: js/bon.js");
 }
+if (fs.existsSync("js/bon.js")) {
+  const bonJs = fs.readFileSync("js/bon.js", "utf8");
+  new Function(bonJs);
+  console.log("[OK]  Sintaks JS valid: js/bon.js");
+}
 console.log("\n=== HASIL TEST: " + errors + " ERROR ===");
 process.exit(errors ? 1 : 0);
