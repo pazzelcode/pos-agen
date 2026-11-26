@@ -27,6 +27,32 @@ const simpanTrx = (rows) => {
 };
 
 let statusFilter = "belum";
+const updBonLaba = () => {
+  const j = Number((document.getElementById("bon-jual") || {}).value) || 0;
+  const m = Number((document.getElementById("bon-modal") || {}).value) || 0;
+  const el = document.getElementById("bon-laba-preview");
+  if (el) {
+    const lb = j - m;
+    el.textContent = (lb < 0 ? "- " : "") + rp(Math.abs(lb));
+    el.style.color = lb < 0 ? "#f87171" : "#34d399";
+  }
+};
+["bon-jual", "bon-modal"].forEach((id) => {
+  const inp = document.getElementById(id);
+  if (inp) inp.addEventListener("input", updBonLaba);
+});
+window.aksiBatalLunas = (id) => {
+  const rows = bacaTrx().map((r) => String(r.id) === String(id) ? Object.assign({}, r, { statusBon: "belum_lunas", tglLunas: "" }) : r);
+  simpanTrx(rows);
+  updBonLaba();
+renderHalamanBon();
+};
+window.aksiHapusBon = (id) => {
+  if (!confirm("Hapus catatan bon ini?")) return;
+  const rows = bacaTrx().filter((r) => String(r.id) !== String(id));
+  simpanTrx(rows);
+  renderHalamanBon();
+};
 const inputTempo = document.getElementById("bon-tempo");
 if (inputTempo) inputTempo.value = plusHari(3);
 
@@ -102,6 +128,7 @@ if (formBon) {
     rows.unshift(item);
     simpanTrx(rows);
     formBon.reset();
+    updBonLaba();
     if (inputTempo) inputTempo.value = plusHari(3);
     renderHalamanBon();
   });
@@ -149,6 +176,12 @@ function renderHalamanBon() {
     return [r.tujuan, r.jenis, r.ket, r.waPelanggan, r.jatuhTempo].some((v) => String(v || "").toLowerCase().includes(q));
   });
 
+  filtered.sort((a, b) => {
+    const aLunas = a.statusBon === "lunas" ? 1 : 0;
+    const bLunas = b.statusBon === "lunas" ? 1 : 0;
+    if (aLunas !== bLunas) return aLunas - bLunas;
+    return selisihHari(a.jatuhTempo, todayStr) - selisihHari(b.jatuhTempo, todayStr);
+  });
   if (!filtered.length) {
     listEl.innerHTML = "<small style=\"color:#94a3b8\">Tidak ada data bon pada filter ini.</small>";
     return;
@@ -165,8 +198,8 @@ function renderHalamanBon() {
     const judul = [r.tujuan || "Pelanggan", r.jenis].filter(Boolean).join(" • ");
     const sub = [r.ket, "Tempo: " + (r.jatuhTempo || "-")].filter(Boolean).join(" • ");
     const aksi = isLunas
-      ? ""
-      : "<button type=\"button\" class=\"bon-btn-tunda\" onclick=\"aksiTundaTempo('" + r.id + "', 3)\">+3 Hr</button><button type=\"button\" class=\"bon-btn-lunas\" onclick=\"aksiLunasiBon('" + r.id + "')\">Lunas</button><button type=\"button\" class=\"bon-btn-wa\" onclick=\"aksiTagihWA('" + r.id + "')\">WA</button>";
+      ? "<button type=\"button\" class=\"bon-btn-tunda\" onclick=\"aksiBatalLunas('" + r.id + "')\">Batal Lunas</button><button type=\"button\" class=\"bon-btn-tunda\" onclick=\"aksiHapusBon('" + r.id + "')\">Hapus</button>"
+      : "<button type=\"button\" class=\"bon-btn-tunda\" onclick=\"aksiTundaTempo('" + r.id + "', 3)\">+3 Hr</button><button type=\"button\" class=\"bon-btn-lunas\" onclick=\"aksiLunasiBon('" + r.id + "')\">Lunas</button><button type=\"button\" class=\"bon-btn-wa\" onclick=\"aksiTagihWA('" + r.id + "')\">WA</button><button type=\"button\" class=\"bon-btn-tunda\" onclick=\"aksiHapusBon('" + r.id + "')\">Hapus</button>";
 
     return "<div class=\"bon-item\"><div><div><strong>" + judul + "</strong>" + badge + "</div><small>" + rp(r.jual || 0) + " • " + sub + "</small></div><div class=\"bon-aksi\">" + aksi + "</div></div>";
   }).join("");
