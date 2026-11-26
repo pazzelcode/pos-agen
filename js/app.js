@@ -339,7 +339,7 @@ const render = () => {
     li.innerHTML = `
       <div class="trx-meta">
         <strong>${item.jenis}</strong>
-        <small>${[item.tujuan, item.ket, item.metode === "bon" ? (item.statusBon === "lunas" ? "[BON LUNAS]" : "[BON • Tempo " + (item.jatuhTempo || "-") + "]") : ""].filter(Boolean).join(" • ")} • ${fmtJamTglPendek(item)}</small>
+        <small>${[item.tujuan, item.ket, item.metode === "bon" ? "<span class=\"bon-tag-merah\">" + (item.statusBon === "lunas" ? "[BON LUNAS]" : "[BON • Tempo " + (item.jatuhTempo || "-") + "]") + "</span>" : ""].filter(Boolean).join(" • ")} • ${fmtJamTglPendek(item)}</small>
       </div>
       <div class="trx-amount">
         <span class="bayar">${rp(jual)}</span>

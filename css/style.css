@@ -66,3 +66,5 @@ input:focus,select:focus{outline:none;border-color:#ffd166}
 .bon-aksi{display:flex;gap:4px;flex-shrink:0}
 .bon-btn-lunas{background:#16a34a;color:#fff;border:none;border-radius:5px;padding:4px 7px;font-size:.7rem;font-weight:700;cursor:pointer}
 .bon-btn-wa{background:#0284c7;color:#fff;border:none;border-radius:5px;padding:4px 7px;font-size:.7rem;font-weight:700;cursor:pointer}
+
+.bon-tag-merah{color:#f87171;font-weight:700}
