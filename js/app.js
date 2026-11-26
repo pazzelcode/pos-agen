@@ -3,6 +3,7 @@ const CFG_KEY = 'pos_agen_cfg_v1';
 const LIC_KEY = 'pos_agen_lic_v1';
 const DEV_KEY = 'pos_agen_dev_v1';
 
+const LAST_BACKUP_KEY = "pos_agen_last_backup_v1";
 const JENIS_KEY = "pos_agen_jenis_v1";
 const DEFAULT_JENIS = ["Transfer","Tarik tunai","E Wallet","Token PLN","Pulsa","Paket Data","Aksesoris","Lainnya"];
 const selectJenis = document.getElementById("jenis");
@@ -440,9 +441,73 @@ cfgForm.addEventListener('submit', (e) => {
   alert('Profil toko tersimpan!');
 });
 
-if (btnBackup) { btnBackup.addEventListener('click', () => {}); }
+const syncBackupReminderUI = () => {
+  const el = document.getElementById("info-status-backup");
+  if (!el) return;
+  const last = getStoreVal(LAST_BACKUP_KEY);
+  const today = (typeof getTodayISO === "function" ? getTodayISO() : toLocalISO(new Date()));
+  const statusTeks = last
+    ? (last === today ? "Backup terakhir: Hari ini (aman)." : "Backup terakhir: " + last + " — disarankan backup ulang hari ini.")
+    : "Belum ada catatan backup — disarankan segera backup sekarang.";
+  el.innerHTML = "<strong>Penting:</strong> Backup rutin ke penyimpanan HP atau Google Drive agar data transaksi & bon tidak hilang. File disimpan sebagai <code>backup-pos-agen.json</code> agar mudah menimpa cadangan lama tanpa menumpuk file.<br><span style=\"color:" + (last === today ? "#34d399" : "#fbbf24") + "\">" + statusTeks + "</span>";
+};
+if (btnBackup) {
+  btnBackup.addEventListener("click", () => {
+    const payload = {
+      app: "pos-agen",
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      cfg: getCfg(),
+      jenis: getJenisList(),
+      transaksi: getData()
+    };
+    const tgl = (typeof getTodayISO === "function" ? getTodayISO() : toLocalISO(new Date()));
+    const ok = downloadFile(JSON.stringify(payload, null, 2), "backup-pos-agen.json", "application/json;charset=utf-8");
+    if (ok) {
+      setStoreVal(LAST_BACKUP_KEY, tgl);
+      syncBackupReminderUI();
+      alert("Backup Data POS Agen (backup-pos-agen.json) berhasil disimpan ke folder Download HP. Anda juga bisa menimpanya di Google Drive agar tidak menumpuk file.");
+    }
+  });
+}
 
-if (btnRestore) { btnRestore.addEventListener('click', () => {}); }
+if (btnRestore && fileRestore) {
+  btnRestore.addEventListener("click", () => {
+    fileRestore.value = "";
+    fileRestore.click();
+  });
+  fileRestore.addEventListener("change", (ev) => {
+    const file = ev.target && ev.target.files && ev.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(String(reader.result || "{}"));
+        const rows = Array.isArray(parsed) ? parsed : (Array.isArray(parsed.transaksi) ? parsed.transaksi : null);
+        if (!rows) {
+          alert("File backup tidak sesuai.");
+          return;
+        }
+        saveData(rows);
+        if (parsed && !Array.isArray(parsed)) {
+          if (parsed.cfg && typeof parsed.cfg === "object") {
+            setStoreVal(CFG_KEY, JSON.stringify(parsed.cfg));
+            applyCfg();
+          }
+          if (Array.isArray(parsed.jenis) && parsed.jenis.length) {
+            saveJenisList(parsed.jenis);
+            renderJenisOptions(selectJenis ? selectJenis.value : undefined);
+          }
+        }
+        render();
+        alert("Data POS Agen berhasil dipulihkan (" + rows.length + " transaksi).");
+      } catch (e) {
+        alert("Gagal membaca file backup.");
+      }
+    };
+    reader.readAsText(file);
+  });
+}
 
 btnCsv.addEventListener('click', () => {
   const rows = getData();
@@ -689,6 +754,7 @@ const enforceLicense = () => {
 };
 
 syncDevIdUI();
+syncBackupReminderUI();
 initAuditUI();
 applyCfg();
 hitungLaba();
