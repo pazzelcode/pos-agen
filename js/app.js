@@ -215,25 +215,45 @@ const applyCfg = () => {
   cfgAlamat.value = c.alamat || '';
 };
 
+const normRowItem = (item, idx) => {
+  const obj = (item && typeof item === "object") ? Object.assign({}, item) : {};
+  if (!obj.id) obj.id = Date.now() + idx;
+  const jual = Number(obj.jual ?? ((Number(obj.modal) || 0) + (Number(obj.laba) || 0))) || 0;
+  const modal = Number(obj.modal) || 0;
+  const laba = (obj.laba !== undefined && obj.laba !== null && obj.laba !== "") ? (Number(obj.laba) || 0) : (jual - modal);
+  obj.jual = jual;
+  obj.modal = modal;
+  obj.laba = laba;
+  obj.metode = obj.metode === "bon" ? "bon" : "tunai";
+  obj.statusBon = obj.metode === "bon" ? (obj.statusBon === "lunas" ? "lunas" : "belum") : "lunas";
+  if (!obj.jatuhTempo) obj.jatuhTempo = "";
+  if (!obj.tglISO && typeof getTodayISO === "function") obj.tglISO = getTodayISO();
+  return obj;
+};
+
 const getData = () => {
+  let lsRows = null;
+  let ckRows = null;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) return parsed;
+      if (Array.isArray(parsed)) lsRows = parsed;
     }
   } catch {}
   try {
     const m = document.cookie.match(new RegExp("(?:^|; )" + STORAGE_KEY + "=([^;]*)"));
     if (m && m[1]) {
       const parsed = JSON.parse(decodeURIComponent(m[1]));
-      if (Array.isArray(parsed)) {
-        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed)); } catch {}
-        return parsed;
-      }
+      if (Array.isArray(parsed)) ckRows = parsed;
     }
   } catch {}
-  return [];
+  const chosen = (Array.isArray(lsRows) && lsRows.length) ? lsRows : ((Array.isArray(ckRows) && ckRows.length) ? ckRows : (lsRows || ckRows || []));
+  const normalized = chosen.map(normRowItem);
+  if ((!Array.isArray(lsRows) || !lsRows.length) && normalized.length) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized)); } catch {}
+  }
+  return normalized;
 };
 
 const saveData = (rows) => {
@@ -613,8 +633,8 @@ syncDevIdUI();
 initAuditUI();
 applyCfg();
 hitungLaba();
-render();
 enforceLicense();
+render();
 
 if (btnLihatRiwayat) {
   btnLihatRiwayat.addEventListener("click", () => {
