@@ -157,7 +157,23 @@ function renderHalamanBon() {
     }
   });
 
-  const elAktif = document.getElementById("bon-stat-aktif");
+    const rekapEl = document.getElementById("bon-rekap-pelanggan");
+  if (rekapEl) {
+    const mapPel = new Map();
+    semuaBon.filter((r) => r.statusBon !== "lunas").forEach((r) => {
+      const nama = (r.tujuan || "Pelanggan").trim() || "Pelanggan";
+      const cur = mapPel.get(nama) || { nama, cnt: 0, total: 0, tempo: r.jatuhTempo || "" };
+      cur.cnt += 1;
+      cur.total += Number(r.jual) || 0;
+      if (r.jatuhTempo && (!cur.tempo || r.jatuhTempo < cur.tempo)) cur.tempo = r.jatuhTempo;
+      mapPel.set(nama, cur);
+    });
+    const daftarPel = Array.from(mapPel.values()).sort((a, b) => b.total - a.total);
+    rekapEl.innerHTML = daftarPel.length
+      ? "<div style=\"padding:8px 10px;border-radius:8px;background:rgba(15,23,42,.7);border:1px solid rgba(148,163,184,.22);font-size:.75rem;line-height:1.5\"><strong>Rekap Bon Aktif per Pelanggan:</strong><br>" + daftarPel.map((p) => p.nama + " (" + p.cnt + " nota): <strong>" + rp(p.total) + "</strong>" + (p.tempo ? " • Tempo: " + p.tempo : "")).join("<br>") + "</div>"
+      : "";
+  }
+const elAktif = document.getElementById("bon-stat-aktif");
   const elMendesak = document.getElementById("bon-stat-mendesak");
   const elLunas = document.getElementById("bon-stat-lunas");
   if (elAktif) elAktif.textContent = rp(aktifNominal);
