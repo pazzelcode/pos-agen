@@ -96,9 +96,10 @@
   <section class="card list-box">
     <div class="list-head">
       <h2>Riwayat Transaksi</h2>
-      <div style="display:flex;gap:6px"><button type="button" id="btn-csv" style="background:#f59e0b;color:#111827;border:none;padding:6px 10px;border-radius:6px;font-size:.75rem;font-weight:700;cursor:pointer">Export CSV</button><button type="button" id="btn-reset" class="btn-danger">Reset Hari Ini</button></div>
+      <div class="trx-aksi-3"><button type="button" id="btn-lihat-riwayat" class="btn-riwayat">Lihat Riwayat</button><button type="button" id="btn-csv" class="btn-csv-aksi">Export CSV</button><button type="button" id="btn-reset" class="btn-danger">Reset Hari Ini</button></div>
     </div>
     <input type="search" id="cari-trx" placeholder="Cari layanan, nama, nomor HP, atau bank..." style="margin-bottom:10px">
+    <div id="riwayat-tgl-wrap" class="tgl-strip-wrap" style="display:none"><div class="tgl-strip-top"><span id="tgl-strip-bulan" class="tgl-strip-bulan"></span><button type="button" id="btn-tgl-hari-ini" class="tgl-strip-reset">Hari Ini</button></div><div id="tgl-strip-list" class="tgl-strip-list"></div></div>
     <ul id="trx-list" class="trx-list"></ul>
   </section>
 </main>

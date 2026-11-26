@@ -49,6 +49,48 @@ const elTrx = document.getElementById('total-trx');
 const elTgl = document.getElementById('tanggal-hari');
 const btnReset = document.getElementById('btn-reset');
 const btnCsv = document.getElementById('btn-csv');
+const btnLihatRiwayat = document.getElementById('btn-lihat-riwayat');
+const riwayatTglWrap = document.getElementById('riwayat-tgl-wrap');
+const tglStripBulan = document.getElementById('tgl-strip-bulan');
+const tglStripList = document.getElementById('tgl-strip-list');
+const btnTglHariIni = document.getElementById('btn-tgl-hari-ini');
+let riwayatFilterAktif = false;
+let tanggalDipilihISO = "";
+const BULAN_PANJANG = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+const HARI_PENDEK = ["Min","Sen","Sel","Rab","Kam","Jum","Sab"];
+const toLocalISO = (d) => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const t = String(d.getDate()).padStart(2, "0");
+  return y + "-" + m + "-" + t;
+};
+const renderTglStrip = (rows) => {
+  if (!riwayatTglWrap || !tglStripList || !tglStripBulan) return;
+  const todayStr = (typeof getTodayISO === "function" ? getTodayISO() : toLocalISO(new Date()));
+  if (!tanggalDipilihISO) tanggalDipilihISO = todayStr;
+  const setTgl = new Set([todayStr, tanggalDipilihISO]);
+  (rows || []).forEach((r) => { const d = normTrxDate(r); if (d) setTgl.add(d); });
+  const base = new Date(tanggalDipilihISO + "T00:00:00");
+  const start = new Date(base); start.setDate(base.getDate() - 10);
+  const end = new Date(base); end.setDate(base.getDate() + 10);
+  for (let cur = new Date(start); cur <= end; cur.setDate(cur.getDate() + 1)) {
+    setTgl.add(toLocalISO(cur));
+  }
+  const listSorted = Array.from(setTgl).sort();
+  const p = /^(\d{4})-(\d{2})-(\d{2})$/.exec(tanggalDipilihISO) || [null, "2026", "11", "26"];
+  tglStripBulan.textContent = (BULAN_PANJANG[Number(p[2]) - 1] || "") + " " + p[1];
+  tglStripList.innerHTML = listSorted.map((iso) => {
+    const dt = new Date(iso + "T00:00:00");
+    const aktif = iso === tanggalDipilihISO ? " aktif" : "";
+    return "<button type=\"button\" class=\"tgl-item" + aktif + "\" data-iso=\"" + iso + "\"><span class=\"tgl-bulat\">" + dt.getDate() + "</span><span class=\"tgl-hari\">" + HARI_PENDEK[dt.getDay()] + "</span></button>";
+  }).join("");
+  tglStripList.querySelectorAll(".tgl-item").forEach((el) => {
+    el.addEventListener("click", () => {
+      tanggalDipilihISO = el.dataset.iso;
+      render();
+    });
+  });
+};
 const inputCari = document.getElementById('cari-trx');
 
 const inputJual = document.getElementById('jual');
@@ -160,15 +202,19 @@ const hapusItem = (id) => {
 
 const render = () => {
   const allRows = getData();
+  if (riwayatFilterAktif) renderTglStrip(allRows);
   const q = (inputCari ? inputCari.value : '').trim().toLowerCase();
-  const rows = q
-    ? allRows.filter((item) =>
-        String(item.jenis || '').toLowerCase().includes(q) ||
-        String(item.tujuan || '').toLowerCase().includes(q) ||
-        String(item.ket || '').toLowerCase().includes(q) ||
-        String(item.jam || '').toLowerCase().includes(q)
-      )
-    : allRows;
+  const rows = allRows.filter((item) => {
+    const matchTgl = !riwayatFilterAktif || normTrxDate(item) === tanggalDipilihISO;
+    if (!matchTgl) return false;
+    if (!q) return true;
+    return (
+      String(item.jenis || '').toLowerCase().includes(q) ||
+      String(item.tujuan || '').toLowerCase().includes(q) ||
+      String(item.ket || '').toLowerCase().includes(q) ||
+      String(item.jam || '').toLowerCase().includes(q)
+    );
+  });
 
   let totalMasuk = 0;
   let totalLaba = 0;
