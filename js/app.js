@@ -306,8 +306,13 @@ const render = () => {
     const modal = Number(item.modal) || 0;
     const jual = Number(item.jual ?? (modal + (Number(item.laba) || 0)));
     const laba = Number(item.laba ?? (jual - modal));
+    const isBonAktif = item.metode === "bon" && item.statusBon !== "lunas";
     totalMasuk += jual;
-    totalLabaTunai += laba;
+    if (isBonAktif) {
+      totalBonAktif += jual;
+    } else {
+      totalLabaTunai += laba;
+    }
 
     const li = document.createElement('li');
     li.className = 'trx-item';
@@ -329,6 +334,7 @@ const render = () => {
 
   elMasuk.textContent = rp(totalMasuk);
   elLaba.textContent = (totalLabaTunai < 0 ? '-' : '') + rp(Math.abs(totalLabaTunai));
+  if (elBonAktif) elBonAktif.textContent = rp(totalBonAktif);
   elTrx.textContent = rows.length;
 };
 
