@@ -312,6 +312,8 @@ const render = () => {
   const rows = allRows.filter((item) => {
     const matchTgl = !riwayatFilterAktif || normTrxDate(item) === tanggalDipilihISO;
     if (!matchTgl) return false;
+    const metodeItem = (item.metode || "tunai").toLowerCase();
+    if (filterMetodeTrx !== "semua" && metodeItem !== filterMetodeTrx) return false;
     if (!q) return true;
     return (
       String(item.jenis || '').toLowerCase().includes(q) ||
@@ -327,7 +329,7 @@ const render = () => {
 
   listEl.innerHTML = '';
   if (!rows.length) {
-    listEl.innerHTML = `<li class="trx-item"><small>${q ? 'Transaksi tidak ditemukan.' : 'Belum ada transaksi hari ini.'}</small></li>`;
+    listEl.innerHTML = `<li class="trx-item"><small>${(q || filterMetodeTrx !== 'semua') ? 'Transaksi tidak ditemukan.' : 'Belum ada transaksi hari ini.'}</small></li>`;
   }
 
   rows.forEach((item) => {
