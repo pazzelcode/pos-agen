@@ -77,7 +77,7 @@
       <label>Jenis Layanan</label>
       <div style="display:flex;gap:8px;align-items:center;"><select id="jenis" required style="flex:1;"></select><button type="button" id="btn-add-jenis" title="Tambah Layanan" aria-label="Tambah Layanan" style="padding:8px 12px;font-weight:bold;cursor:pointer;">+</button></div>
       <label for="tujuan">Tujuan</label>
-      <input type="text" id="tujuan" placeholder="Cth: nama pelanggan / nama barang" required>
+      <div class="tujuan-row"><input type="text" id="tujuan" placeholder="Cth: nama pelanggan / nama barang" required><button type="button" id="btn-list-tujuan" class="btn-list-tujuan" title="Pilih dari daftar" aria-label="Pilih dari daftar" style="display:none">List</button></div><div id="tujuan-popover" class="tujuan-popover" style="display:none"></div>
       <label for="ket">Keterangan</label>
       <input type="text" id="ket" placeholder="Cth: nominal / Jumlah / Jenis barang" required>
       <div class="grid-harga" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:9px">

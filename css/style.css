@@ -72,3 +72,5 @@ input:focus,select:focus{outline:none;border-color:#ffd166}
 .trx-filter-bar{display:flex;justify-content:flex-end;gap:6px;margin-bottom:10px}
 .btn-filter-trx{padding:5px 10px;border-radius:8px;border:1px solid rgba(148,163,184,.3);background:rgba(15,23,42,.65);color:#cbd5e1;font-size:12px;font-weight:600;cursor:pointer}
 .btn-filter-trx.aktif{background:#e11d48;border-color:#fb7185;color:#fff}
+
+.tujuan-row{display:flex;gap:6px;align-items:center}.tujuan-row input{flex:1;min-width:0}.btn-list-tujuan{padding:8px 10px;border-radius:8px;border:1px solid rgba(148,163,184,.35);background:rgba(30,41,59,.85);color:#f8fafc;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0}.tujuan-popover{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;padding:8px;border-radius:10px;border:1px solid rgba(148,163,184,.3);background:rgba(15,23,42,.95)}.tujuan-chip{padding:5px 9px;border-radius:999px;border:1px solid rgba(251,113,133,.45);background:rgba(225,29,72,.18);color:#ffe4e6;font-size:12px;font-weight:600;cursor:pointer}.tujuan-chip:hover{background:#e11d48;color:#fff}

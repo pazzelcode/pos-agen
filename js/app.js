@@ -29,6 +29,55 @@ const renderJenisOptions = (selectedVal) => {
   else if (list.length) selectJenis.value = list[0];
 };
 renderJenisOptions();
+const LIST_TUJUAN_JENIS = {
+  "transfer": ["BCA", "BRI", "BNI", "Mandiri", "BSI", "CIMB Niaga", "Permata", "SeaBank", "BTN", "Danamon"],
+  "tarik tunai": ["50rb", "100rb", "150rb", "200rb", "250rb", "300rb", "400rb", "500rb", "750rb", "1jt"],
+  "e wallet": ["DANA", "OVO", "GoPay", "ShopeePay", "LinkAja", "DOKU"],
+  "token pln": ["20rb", "50rb", "100rb", "200rb", "500rb"],
+  "pulsa": ["5rb", "10rb", "15rb", "20rb", "25rb", "30rb", "50rb", "100rb"],
+  "paket data": ["IM3", "XL", "Tri (3)", "Telkomsel", "Axis", "Smartfren"]
+};
+const btnListTujuan = document.getElementById("btn-list-tujuan");
+const tujuanPopover = document.getElementById("tujuan-popover");
+const inputTujuanEl = document.getElementById("tujuan");
+const getItemsTujuan = () => {
+  const key = String(selectJenis ? selectJenis.value : "").trim().toLowerCase();
+  return LIST_TUJUAN_JENIS[key] || [];
+};
+const syncListTujuanUI = () => {
+  const items = getItemsTujuan();
+  if (btnListTujuan) btnListTujuan.style.display = items.length ? "inline-block" : "none";
+  if (!items.length && tujuanPopover) {
+    tujuanPopover.style.display = "none";
+    tujuanPopover.innerHTML = "";
+  }
+};
+if (btnListTujuan && tujuanPopover && inputTujuanEl) {
+  btnListTujuan.addEventListener("click", () => {
+    const items = getItemsTujuan();
+    if (!items.length) return;
+    const isOpen = tujuanPopover.style.display !== "none";
+    if (isOpen) {
+      tujuanPopover.style.display = "none";
+      return;
+    }
+    tujuanPopover.innerHTML = items.map((v) => "<button type=\"button\" class=\"tujuan-chip\" data-val=\"" + v.replace(/"/g, "&quot;") + "\">" + v + "</button>").join("");
+    tujuanPopover.style.display = "flex";
+    if (typeof tujuanPopover.querySelectorAll === "function") {
+      Array.from(tujuanPopover.querySelectorAll(".tujuan-chip")).forEach((ch) => {
+        ch.addEventListener("click", () => {
+          inputTujuanEl.value = ch.dataset.val || "";
+          tujuanPopover.style.display = "none";
+          inputTujuanEl.focus();
+        });
+      });
+    }
+  });
+}
+if (selectJenis) {
+  selectJenis.addEventListener("change", syncListTujuanUI);
+}
+syncListTujuanUI();
 if (btnAddJenis) {
   btnAddJenis.addEventListener("click", () => {
     const nama = prompt("Masukkan nama layanan baru:");
