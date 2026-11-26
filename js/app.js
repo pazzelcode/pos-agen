@@ -523,3 +523,19 @@ applyCfg();
 hitungLaba();
 render();
 enforceLicense();
+
+if (btnLihatRiwayat) {
+  btnLihatRiwayat.addEventListener("click", () => {
+    riwayatFilterAktif = !riwayatFilterAktif;
+    if (riwayatFilterAktif) tanggalDipilihISO = (typeof getTodayISO === "function" ? getTodayISO() : toLocalISO(new Date()));
+    if (riwayatTglWrap) riwayatTglWrap.style.display = riwayatFilterAktif ? "block" : "none";
+    btnLihatRiwayat.classList.toggle("aktif", riwayatFilterAktif);
+    render();
+  });
+}
+if (btnTglHariIni) {
+  btnTglHariIni.addEventListener("click", () => {
+    tanggalDipilihISO = (typeof getTodayISO === "function" ? getTodayISO() : toLocalISO(new Date()));
+    render();
+  });
+}
