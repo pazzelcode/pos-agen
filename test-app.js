@@ -104,5 +104,18 @@ try {
   fail("Runtime error saat simulasi js/app.js: " + e.message);
 }
 
+if (fs.existsSync("bon.html")) {
+  const bonHtml = fs.readFileSync("bon.html", "utf8");
+  for (const id of ["bon-list", "bon-ringkas"]) {
+    if (!bonHtml.includes("id=\x27" + id + "\x27") && !bonHtml.includes("id=\"" + id + "\"")) {
+      console.log("[WARN] ID bon.html tidak ditemukan: #" + id);
+    }
+  }
+}
+if (fs.existsSync("js/bon.js")) {
+  const bonJs = fs.readFileSync("js/bon.js", "utf8");
+  new Function(bonJs);
+  console.log("[OK]  Sintaks JS valid: js/bon.js");
+}
 console.log("\n=== HASIL TEST: " + errors + " ERROR ===");
 process.exit(errors ? 1 : 0);
