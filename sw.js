@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pos-agen-v29';
+const CACHE_NAME = 'pos-agen-v30';
 const ASSETS = ['./', './index.html', './css/style.css', './js/app.js', './manifest.json'];
 
 self.addEventListener('install', (e) => {

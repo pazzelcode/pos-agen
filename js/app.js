@@ -147,6 +147,14 @@ const renderTglStrip = (rows) => {
   });
 };
 const inputCari = document.getElementById('cari-trx');
+let filterMetodeTrx = "semua";
+(typeof document.querySelectorAll === "function" ? Array.from(document.querySelectorAll(".btn-filter-trx")) : []).forEach((btn) => {
+  btn.addEventListener("click", () => {
+    filterMetodeTrx = btn.dataset.filter || "semua";
+    (typeof document.querySelectorAll === "function" ? Array.from(document.querySelectorAll(".btn-filter-trx")) : []).forEach((b) => b.classList.toggle("aktif", b === btn));
+    if (typeof render === "function") render();
+  });
+});
 
 const inputJual = document.getElementById('jual');
 const inputModal = document.getElementById('modal');
